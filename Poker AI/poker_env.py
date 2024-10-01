@@ -2,12 +2,20 @@
 import random
 import numpy as np
 from main import Game, Player, Pot
+from settings import *
 
 
 class SimplePokerEnv:
     def __init__(self):
         game = Game()
-        self.player_hands = [game.p1.cards, game.p2.cards]
+        self.player_hands = [[0, 0], [0, 0]]
+        for i in range(2):
+            for j in range(2):
+                self.player_hands[i][j] = ((value_dict[game.hand.dealer.player_list[i].cards[j].data.value] - 1) +
+                                           (13 * suit_dict[game.hand.dealer.player_list[i].cards[j].data.suit]))
+
+
+
 
 
     def reset(self):
