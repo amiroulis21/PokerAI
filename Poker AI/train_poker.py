@@ -28,7 +28,7 @@ def train_agents(episodes=1000):
     env = SimplePokerEnv()
     input_size = 2 + 5 + 1 + 2 + 1  # hand(2) + community(5) + pot(1) + bets(2) + current_player(1)
     hidden_size = 128
-    action_size = 2  # Actions: Check/Call, Bet/Raise
+    action_size = 3  # Actions: Fold, Check/Call, Bet/Raise
 
     agent0 = DQNAgent(input_size, hidden_size, action_size)
     agent1 = DQNAgent(input_size, hidden_size, action_size)

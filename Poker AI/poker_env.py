@@ -1,37 +1,43 @@
-
 import random
 import numpy as np
-from main import Game, Player, Pot
+from main import Game, Hand, Player, Pot
 from settings import *
 
 
 class SimplePokerEnv:
     def __init__(self):
-        game = Game()
-        self.player_hands = [[0, 0], [0, 0]]
-        for i in range(2):
-            for j in range(2):
-                self.player_hands[i][j] = ((value_dict[game.hand.dealer.player_list[i].cards[j].data.value] - 1) +
-                                           (13 * suit_dict[game.hand.dealer.player_list[i].cards[j].data.suit]))
-
-
+        self.game = Game()
+        self.player_hands = [[], []]
+        self.current_player = 0
+        self.community_cards = []
+        self.is_running = False
 
 
 
     def reset(self):
-        game.hand.p1.cards.clear()
-        game.hand.p2.cards.clear()
-        game.hand.p1.current_bet = 0
-        game.hand.p2.current_bet = 0
-        game.hand.p1.total_bet = 0
-        game.hand.p2.total_bet = 0
-        game.hand.p1.fold = False
-        game.hand.p2.fold = False
-        game.hand.p1.all_in = False
-        game.hand.p2.all_in = False
-        game.hand.p1.check = False
-        game.hand.p2.check = False
-        game.pot_size.size = 0
+        if not self.is_running:
+            self.game.run()
+            self.is_running = True
+        self.game.hand.p1.cards.clear()
+        self.game.hand.p2.cards.clear()
+        self.game.hand.p1.current_bet = 0
+        self.game.hand.p2.current_bet = 0
+        self.game.hand.p1.total_bet = 0
+        self.game.hand.p2.total_bet = 0
+        self.game.hand.p1.fold = False
+        self.game.hand.p2.fold = False
+        self.game.hand.p1.all_in = False
+        self.game.hand.p2.all_in = False
+        self.game.hand.p1.check = False
+        self.game.hand.p2.check = False
+        self.game.pot_size.size = 0
+        self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
+
+        for i in range(2):
+            for j in range(2):
+                self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 1) +
+                                           (13 * suit_dict[self.game.hand.dealer.player_list[i].cards[j].data.suit]))
+
 
     """
         # Initialize the deck: 52 cards represented by numbers 0-51
@@ -64,25 +70,37 @@ class SimplePokerEnv:
 
         state = {
             'hand': self.player_hands[self.current_player],
-            'community': self.community_cards,
-            'pot': self.pot,
-            'bets': self.bets.copy(),
+            'community': self.game.hand.flop,
+            'pot': self.game.pot_size,
+            'bets': [self.game.p1.current_bet, self.game.p2.current_bet],
             'current_player': self.current_player
         }
         return state
 
     def step(self, action):
-        # Actions: 0 = Check/Call, 1 = Bet/Raise
+        # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet/Raise
         if action == 0:
+            self.game.fold(self.game.player_list[self.current_player])
+        if action == 1:
             # Player checks/calls
-            bet_amount = self.bets[1 - self.current_player] - self.bets[self.current_player]
-            self.bets[self.current_player] += bet_amount
-            self.pot += bet_amount
-        elif action == 1:
+            bet_amount = min(self.game.amount_to_call, self.game.player_list[self.current_player].chips)
+            if bet_amount > 0:
+                self.game.call(self.game.player_list[self.current_player], bet_amount)
+            elif bet_amount == 0:
+                self.game.check(self.game.player_list[self.current_player])
+        elif action == 2:
             # Player bets/raises
-            bet_amount = 10  # Fixed bet/raise amount
-            self.bets[self.current_player] += bet_amount
-            self.pot += bet_amount
+            bet_amount = 10
+            raise_amount = self.game.amount_to_call + bet_amount# Fixed bet/raise amount
+            if self.game.betting_state == 0:
+                self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
+                                                                    self.game.player_list[self.current_player].chips))
+            else:
+                self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
+                                                                    self.game.player_list[self.current_player].chips))
+
+
+
         else:
             raise ValueError("Invalid action")
 
@@ -119,9 +137,3 @@ class SimplePokerEnv:
         else:
             # Tie
             return [0, 0]
-
-
-
-
-
-

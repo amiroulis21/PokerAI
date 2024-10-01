@@ -253,6 +253,7 @@ class Game:
 
 
 
+
             # Time variables
             self.delta_time = (pygame.time.get_ticks() - self.start_time) / 1000
             self.start_time = pygame.time.get_ticks()

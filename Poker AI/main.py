@@ -54,6 +54,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.p1 = Player(1)
         self.p2 = Player(2)
+        self.player_list = [self.p1, self.p2]
         self.pot_size = Pot()
         self.hand = Hand(self.p1, self.p2, self.pot_size)
         self.ante = 5
