@@ -192,26 +192,25 @@ class Dealer():
     def deal_flop(self):
         # Set flop card locations
 
-        flop_x = self.players_list[0].cards[0].card_surf.get_width()
-        if self.current_flop_index == 0:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2
-        elif self.current_flop_index == 1:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
+        while self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
+            flop_x = self.players_list[0].cards[0].card_surf.get_width()
+            if self.current_flop_index == 0:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2
+            elif self.current_flop_index == 1:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
                         self.players_list[0].cards[0].card_surf.get_width() + 20)
-        elif self.current_flop_index == 2:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
+            elif self.current_flop_index == 2:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
                         self.players_list[0].cards[0].card_surf.get_width() * 2 + 40)
 
-        # Three flop cards in above set locations; remove from deck; flop cooldown
-        if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
-            #self.card_audio()
             self.flop.cards.append(self.deck[-1])
             self.flop.cards[self.current_flop_index].position = (
-            flop_x, self.flop.cards[self.current_flop_index].card_y)
+                flop_x, self.flop.cards[self.current_flop_index].card_y)
             self.deck.pop(-1)
             self.last_dealt_flop_time = pygame.time.get_ticks()
-            self.can_deal_flop = False
+            self.dealt_cards += 1
             self.current_flop_index += 1
+        self.can_deal_flop = False
 
 
         # Print length of deck after card is dealt for troubleshooting

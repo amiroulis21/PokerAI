@@ -4,7 +4,6 @@ from settings import *
 from main import Player
 from main import Pot
 
-
 # Audio
 """pygame.mixer.init()
 audio_files = os.listdir(GAME_AUDIO_DIR)
@@ -28,8 +27,6 @@ class Hand:
         self.player_list = [self.p1, self.p2]
         self.dealer = Dealer(self.player_list, self.flop, self.pot_size)
         self.p1.can_bet = True
-
-
 
     def render_cards(self):
         # Draw cards at current positions
@@ -78,9 +75,6 @@ class Hand:
             rotated_surface = pygame.transform.rotate(text_surface, self.win_rotation_angle)
             rotated_rect = rotated_surface.get_rect(center=text_rect.center)
             self.display_surface.blit(rotated_surface, rotated_rect)
-
-
-
 
     def update(self):
         self.dealer.update()
@@ -172,10 +166,10 @@ class Dealer():
             elif self.current_player_index == 1:
                 if len(current_player.cards) == 1:
                     current_player.cards[0].position = (
-                    (P2_C1[0] - current_player.cards[0].card_surf.get_width() - 80), current_player.cards[0].card_y)
+                        (P2_C1[0] - current_player.cards[0].card_surf.get_width() - 80), current_player.cards[0].card_y)
                 elif len(current_player.cards) == 2:
                     current_player.cards[1].position = (
-                    (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
+                        (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
                 self.animating_card = current_player.cards[-1]
 
             if self.animating_card:
@@ -192,31 +186,25 @@ class Dealer():
 
     def deal_flop(self):
         # Set flop card locations
-
-        flop_x = self.players_list[0].cards[0].card_surf.get_width()
-        if self.current_flop_index == 0:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2
-        elif self.current_flop_index == 1:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
+        while self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
+            flop_x = self.players_list[0].cards[0].card_surf.get_width()
+            if self.current_flop_index == 0:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2
+            elif self.current_flop_index == 1:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
                         self.players_list[0].cards[0].card_surf.get_width() + 20)
-        elif self.current_flop_index == 2:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
+            elif self.current_flop_index == 2:
+                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
                         self.players_list[0].cards[0].card_surf.get_width() * 2 + 40)
 
-        # Three flop cards in above set locations; remove from deck; flop cooldown
-        if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
-            #self.card_audio()
             self.flop.cards.append(self.deck[-1])
             self.flop.cards[self.current_flop_index].position = (
             flop_x, self.flop.cards[self.current_flop_index].card_y)
             self.deck.pop(-1)
             self.last_dealt_flop_time = pygame.time.get_ticks()
-            self.can_deal_flop = False
+            self.dealt_cards += 1
             self.current_flop_index += 1
-
-
-        # Print length of deck after card is dealt for troubleshooting
-        # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
+        self.can_deal_flop = False
 
     # Hand-ranking algorithm reference in README.md
     def eval_hand(self, hand):
@@ -299,7 +287,6 @@ class Dealer():
             print(f"P1 {self.players_list[0].chips}")
             print(f"P2 {self.players_list[1].chips}")
 
-
     # Print to console
     def print_hands(self):
         for i in range(len(self.players_list)):
@@ -327,13 +314,13 @@ class Dealer():
         if self.determined_winner is None:
             self.eval_folds()
 
-
         # Deal flop after hole cards are dealt and animations are done and bets are in
         if self.dealt_cards == (self.num_players * 2) and (
                 not self.animating_card or self.animating_card.animation_complete):
             if self.players_list[0].current_bet == self.players_list[1].current_bet and (
-                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
-                    self.players_list[0].check and self.players_list[1].check)):
+                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[
+                1].all_in or (
+                            self.players_list[0].check and self.players_list[1].check)):
                 self.can_deal_flop = True
 
         if self.dealt_cards < (self.num_players * 2) + 3 and self.can_deal_flop:
@@ -354,9 +341,10 @@ class Dealer():
             self.print_hands()
             self.printed_flop = True
 
-        if self.dealt_cards == ((self.num_players * 2) + 3) and (self.players_list[0].current_bet == self.players_list[1].current_bet) and (
-                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
-                    self.players_list[0].check and self.players_list[1].check)) and self.determined_winner is None:
+        if self.dealt_cards == ((self.num_players * 2) + 3) and (
+                self.players_list[0].current_bet == self.players_list[1].current_bet) and (
+                self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
+                self.players_list[0].check and self.players_list[1].check)) and self.determined_winner is None:
             eval_cards = [card_id.id for card_id in self.players_list[0].cards] + [card_id.id for card_id in
                                                                                    self.flop.cards] + [card_id.id for
                                                                                                        card_id in
@@ -367,4 +355,3 @@ class Dealer():
                 self.overall_winner = "Player 2"
             elif self.players_list[1].chips == 0:
                 self.overall_winner = "Player 1"
-

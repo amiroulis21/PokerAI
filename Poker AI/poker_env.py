@@ -18,24 +18,25 @@ class SimplePokerEnv:
         if not self.is_running:
             self.game.run()
             self.is_running = True
-        self.game.hand.p1.cards.clear()
-        self.game.hand.p2.cards.clear()
-        self.game.hand.p1.current_bet = 0
-        self.game.hand.p2.current_bet = 0
-        self.game.hand.p1.total_bet = 0
-        self.game.hand.p2.total_bet = 0
-        self.game.hand.p1.fold = False
-        self.game.hand.p2.fold = False
-        self.game.hand.p1.all_in = False
-        self.game.hand.p2.all_in = False
-        self.game.hand.p1.check = False
-        self.game.hand.p2.check = False
-        self.game.pot_size.size = 0
-        self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
+        else:
+            self.game.hand.p1.cards.clear()
+            self.game.hand.p2.cards.clear()
+            self.game.hand.p1.current_bet = 0
+            self.game.hand.p2.current_bet = 0
+            self.game.hand.p1.total_bet = 0
+            self.game.hand.p2.total_bet = 0
+            self.game.hand.p1.fold = False
+            self.game.hand.p2.fold = False
+            self.game.hand.p1.all_in = False
+            self.game.hand.p2.all_in = False
+            self.game.hand.p1.check = False
+            self.game.hand.p2.check = False
+            self.game.pot_size.size = 0
+            self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
 
         for i in range(2):
             for j in range(2):
-                self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 1) +
+                self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 2) +
                                            (13 * suit_dict[self.game.hand.dealer.player_list[i].cards[j].data.suit]))
 
 
@@ -98,11 +99,18 @@ class SimplePokerEnv:
             else:
                 self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                     self.game.player_list[self.current_player].chips))
-
-
-
         else:
             raise ValueError("Invalid action")
+
+        if self.game.hand.dealer.round == 2:
+            for i in range(3):
+                self.community_cards[i] = (
+                            (value_dict[self.game.hand.dealer.flop.cards[i].data.value] - 2) +
+                            (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+
+
+
+
 
         # Switch to the other player
         self.current_player = 1 - self.current_player
