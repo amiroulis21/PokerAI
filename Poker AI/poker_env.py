@@ -11,6 +11,7 @@ class SimplePokerEnv:
         self.current_player = 0
         self.community_cards = []
         self.is_running = False
+        self.x = 5
 
 
 
