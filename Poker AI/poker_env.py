@@ -7,13 +7,13 @@ from settings import *
 class SimplePokerEnv:
     def __init__(self):
         self.game = Game()
-        self.player_hands = [[], []]
+        self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
-        self.community_cards = []
+        self.community_cards = [0, 0, 0]
         self.is_running = False
-        self.x = 5
-
-
+        self.phase = 0  # 0 -> pre-flop, 1 -> post-flop
+        self.last_actions = [None, None]
+        self.done = False
 
     def reset(self):
         if not self.is_running:
@@ -39,7 +39,6 @@ class SimplePokerEnv:
             for j in range(2):
                 self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 2) +
                                            (13 * suit_dict[self.game.hand.dealer.player_list[i].cards[j].data.suit]))
-
 
     """
         # Initialize the deck: 52 cards represented by numbers 0-51
@@ -80,9 +79,15 @@ class SimplePokerEnv:
         return state
 
     def step(self, action):
+
+        if action not in [0, 1, 2]:
+            raise ValueError("Invalid action")
         # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet/Raise
         if action == 0:
             self.game.fold(self.game.player_list[self.current_player])
+            self.game.hand.dealer.eval_folds()
+            self.done = True
+
         if action == 1:
             # Player checks/calls
             bet_amount = min(self.game.amount_to_call, self.game.player_list[self.current_player].chips)
@@ -90,42 +95,51 @@ class SimplePokerEnv:
                 self.game.call(self.game.player_list[self.current_player], bet_amount)
             elif bet_amount == 0:
                 self.game.check(self.game.player_list[self.current_player])
+
         elif action == 2:
             # Player bets/raises
             bet_amount = 10
-            raise_amount = self.game.amount_to_call + bet_amount# Fixed bet/raise amount
+            raise_amount = self.game.amount_to_call + bet_amount  # Fixed bet/raise amount
             if self.game.betting_state == 0:
                 self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
-                                                                    self.game.player_list[self.current_player].chips))
+                                                                              self.game.player_list[
+                                                                                  self.current_player].chips))
             else:
                 self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
-                                                                    self.game.player_list[self.current_player].chips))
-        else:
-            raise ValueError("Invalid action")
+                                                                                    self.game.player_list[
+                                                                                        self.current_player].chips))
 
-        if self.game.hand.dealer.round == 2:
-            for i in range(3):
-                self.community_cards[i] = (
+        if self.is_betting_round_over():
+            if self.phase == 0:
+                self.game.hand.dealer.deal_flop()
+                self.phase = 1
+                for i in range(3):
+                    self.community_cards[i] = (
                             (value_dict[self.game.hand.dealer.flop.cards[i].data.value] - 2) +
                             (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
-
-
-
-
-
+                self.game.p1.current_bet = 0
+                self.game.p2.current_bet = 0
+                self.last_actions = [None, None]
+            else:
+                self.done = True
+                reward = self.calculate_rewards()
+                next_state = None
+                return next_state, reward, self.done
         # Switch to the other player
         self.current_player = 1 - self.current_player
 
-        # If both players have acted, end the game
-        if self.bets[0] == self.bets[1]:
-            self.done = True
-            reward = self.calculate_rewards()
-            next_state = None
-        else:
-            reward = [0, 0]  # No immediate reward
-            next_state = self.get_state()
-
+        reward = [0, 0]
+        next_state = self.get_state()
         return next_state, reward, self.done
+
+    def is_betting_round_over(self):
+        if self.last_actions[0] is None or self.last_actions[1] is None:
+            return False
+
+        if self.game.p1.current_bet == self.game.p2.current_bet:
+            return True
+
+        return False
 
     def calculate_rewards(self):
         # Simple hand evaluation: sum of card ranks
