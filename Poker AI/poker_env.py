@@ -71,10 +71,13 @@ class SimplePokerEnv:
 
         state = {
             'hand': self.player_hands[self.current_player],
-            'community': self.game.hand.flop,
+            'community': self.community_cards,
             'pot': self.game.pot_size,
             'bets': [self.game.p1.current_bet, self.game.p2.current_bet],
-            'current_player': self.current_player
+            'chip_stacks': [self.game.p1.chips, self.game.p2.chips],
+            'current_player': self.current_player,
+            'phase': self.phase,
+            'last_actions': self.last_actions
         }
         return state
 
@@ -160,3 +163,8 @@ class SimplePokerEnv:
         else:
             # Tie
             return [0, 0]
+
+    def is_game_over(self):
+        if self.game.hand.dealer.overall_winner is not None:
+            return True
+        return False

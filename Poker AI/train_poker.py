@@ -11,22 +11,30 @@ def preprocess_state(state):
     pot = [state['pot']]
     bets = state['bets']
     current_player = [state['current_player']]
+    chip_stacks = state['chip_stacks']
+    phase = [state['phase']]
+    last_actions = state['last_actions']
 
     # Normalize the card values (0-51) to a range [0, 1]
     hand = np.array(hand) / 51.0
-    community = np.array(community + [0] * (5 - len(community))) / 51.0  # Pad to 5 cards
+    community = np.array(community + [0] * (3 - len(community))) / 51.0
 
     # Normalize pot and bets
     pot = np.array(pot) / 100.0
     bets = np.array(bets) / 100.0
+    chip_stacks = np.array(chip_stacks) / 1000.0
 
-    state_vector = np.concatenate([hand, community, pot, bets, current_player])
+    # Convert last actions (None to -1, 0: Fold, 1: Check/Call, 2: Bet/Raise)
+    action_mapping = {None: -1, 0: 0, 1: 1, 2: 2}
+    last_actions = [action_mapping[a] for a in last_actions]
+
+    state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
     return state_vector
 
 
 def train_agents(episodes=1000):
     env = SimplePokerEnv()
-    input_size = 2 + 5 + 1 + 2 + 1  # hand(2) + community(5) + pot(1) + bets(2) + current_player(1)
+    input_size = 14
     hidden_size = 128
     action_size = 3  # Actions: Fold, Check/Call, Bet/Raise
 
@@ -60,6 +68,9 @@ def train_agents(episodes=1000):
                 agent1.replay()
 
             state = next_state if next_state is not None else state
+
+            if env.is_game_over():
+                done = True
 
         # Update target networks periodically
         if episode % 10 == 0:
