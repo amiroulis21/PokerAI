@@ -33,8 +33,8 @@ class SimplePokerEnv:
         self.dealt_hole_cards = False
         for i in range(2):
             for j in range(2):
-                self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 2) +
-                                           (13 * suit_dict[self.game.hand.dealer.player_list[i].cards[j].data.suit]))
+                self.player_hands[i][j] = ((value_dict[self.game.player_list[i].cards[j].data.value] - 2) +
+                                           (13 * suit_dict[self.game.player_list[i].cards[j].data.suit]))
 
         return self.get_state()
 
