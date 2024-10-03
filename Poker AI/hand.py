@@ -2,8 +2,6 @@ import itertools, os, pygame, random
 from cards import *
 from settings import *
 
-
-
 # Audio
 """pygame.mixer.init()
 audio_files = os.listdir(GAME_AUDIO_DIR)
@@ -27,8 +25,6 @@ class Hand:
         self.player_list = [self.p1, self.p2]
         self.dealer = Dealer(self.player_list, self.flop, self.pot_size)
         self.p1.can_bet = True
-
-
 
     def render_cards(self):
         # Draw cards at current positions
@@ -78,11 +74,8 @@ class Hand:
             rotated_rect = rotated_surface.get_rect(center=text_rect.center)
             self.display_surface.blit(rotated_surface, rotated_rect)
 
-
-
-
     def update(self):
-        self.dealer.update()
+        #self.dealer.update()
         self.render_cards()
         self.render_overall_winner()
         if self.dealer.overall_winner is None:
@@ -171,10 +164,10 @@ class Dealer():
             elif self.current_player_index == 1:
                 if len(current_player.cards) == 1:
                     current_player.cards[0].position = (
-                    (P2_C1[0] - current_player.cards[0].card_surf.get_width() - 80), current_player.cards[0].card_y)
+                        (P2_C1[0] - current_player.cards[0].card_surf.get_width() - 80), current_player.cards[0].card_y)
                 elif len(current_player.cards) == 2:
                     current_player.cards[1].position = (
-                    (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
+                        (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
                 self.animating_card = current_player.cards[-1]
 
             if self.animating_card:
@@ -211,7 +204,6 @@ class Dealer():
             self.dealt_cards += 1
             self.current_flop_index += 1
         self.can_deal_flop = False
-
 
         # Print length of deck after card is dealt for troubleshooting
         # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
@@ -256,20 +248,19 @@ class Dealer():
         eval_cards = [(value_dict[x[0]], x[1]) for x in hand_to_eval]
         if self.eval_hand(eval_cards[:5]) > self.eval_hand(eval_cards[5:]):
             print(f"P1 WIN: {self.eval_hand(eval_cards[:5])}")
-            self.players_list[0].chips += self.players_list[0].total_bet * 2
-            self.pot_size.size -= self.players_list[0].total_bet * 2
-            self.players_list[1].chips += self.pot_size.size
-            print(f"P1 {self.players_list[0].chips}")
-            print(f"P2 {self.players_list[1].chips}")
-            return "Player 1"
-        elif self.eval_hand(eval_cards[:5]) < self.eval_hand(eval_cards[5:]):
-            print(f"P2 WIN: {self.eval_hand(eval_cards[5:])}")
-            self.players_list[1].chips += self.players_list[1].total_bet * 2
-            self.pot_size.size -= self.players_list[1].total_bet * 2
             self.players_list[0].chips += self.pot_size.size
 
             print(f"P1 {self.players_list[0].chips}")
             print(f"P2 {self.players_list[1].chips}")
+            self.overall_winner = self.eval_overall_winner()
+            return "Player 1"
+        elif self.eval_hand(eval_cards[:5]) < self.eval_hand(eval_cards[5:]):
+            print(f"P2 WIN: {self.eval_hand(eval_cards[5:])}")
+            self.players_list[1].chips += self.pot_size.size
+
+            print(f"P1 {self.players_list[0].chips}")
+            print(f"P2 {self.players_list[1].chips}")
+            self.overall_winner = self.eval_overall_winner()
             return "Player 2"
         else:
             print("SPLIT")
@@ -292,11 +283,16 @@ class Dealer():
                 self.players_list[0].chips += self.players_list[0].total_bet * 2
                 self.pot_size.size -= self.players_list[0].total_bet * 2
                 self.players_list[1].chips += self.pot_size.size
-
                 print("P1 WIN")
             print(f"P1 {self.players_list[0].chips}")
             print(f"P2 {self.players_list[1].chips}")
 
+    def eval_overall_winner(self):
+        if self.players_list[0].chips == 0:
+            return "Player 2"
+        elif self.players_list[1].chips == 0:
+            return "Player 1"
+        return None
 
     # Print to console
     def print_hands(self):
@@ -325,13 +321,13 @@ class Dealer():
         if self.determined_winner is None:
             self.eval_folds()
 
-
         # Deal flop after hole cards are dealt and animations are done and bets are in
         if self.dealt_cards == (self.num_players * 2) and (
                 not self.animating_card or self.animating_card.animation_complete):
             if self.players_list[0].current_bet == self.players_list[1].current_bet and (
-                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
-                    self.players_list[0].check and self.players_list[1].check)):
+                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[
+                1].all_in or (
+                            self.players_list[0].check and self.players_list[1].check)):
                 self.can_deal_flop = True
 
         if self.dealt_cards < (self.num_players * 2) + 3 and self.can_deal_flop:
@@ -352,9 +348,10 @@ class Dealer():
             self.print_hands()
             self.printed_flop = True
 
-        if self.dealt_cards == ((self.num_players * 2) + 3) and (self.players_list[0].current_bet == self.players_list[1].current_bet) and (
-                    self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
-                    self.players_list[0].check and self.players_list[1].check)) and self.determined_winner is None:
+        if self.dealt_cards == ((self.num_players * 2) + 3) and (
+                self.players_list[0].current_bet == self.players_list[1].current_bet) and (
+                self.players_list[0].current_bet != 0 or self.players_list[0].all_in or self.players_list[1].all_in or (
+                self.players_list[0].check and self.players_list[1].check)) and self.determined_winner is None:
             eval_cards = [card_id.id for card_id in self.players_list[0].cards] + [card_id.id for card_id in
                                                                                    self.flop.cards] + [card_id.id for
                                                                                                        card_id in
@@ -365,4 +362,3 @@ class Dealer():
                 self.overall_winner = "Player 2"
             elif self.players_list[1].chips == 0:
                 self.overall_winner = "Player 1"
-

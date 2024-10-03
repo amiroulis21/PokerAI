@@ -7,38 +7,36 @@ from settings import *
 class SimplePokerEnv:
     def __init__(self):
         self.game = Game()
+
+    def reset(self):
+        self.game.hand.p1.cards.clear()
+        self.game.hand.p2.cards.clear()
+        self.game.hand.p1.current_bet = 0
+        self.game.hand.p2.current_bet = 0
+        self.game.hand.p1.total_bet = 0
+        self.game.hand.p2.total_bet = 0
+        self.game.hand.p1.fold = False
+        self.game.hand.p2.fold = False
+        self.game.hand.p1.all_in = False
+        self.game.hand.p2.all_in = False
+        self.game.hand.p1.check = False
+        self.game.hand.p2.check = False
+        self.game.pot_size.size = 0
+        self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
+        self.game.hand.dealer.deal_hole_cards()
         self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
-        self.community_cards = [0, 0, 0]
-        self.is_running = False
+        self.community_cards = []
         self.phase = 0  # 0 -> pre-flop, 1 -> post-flop
         self.last_actions = [None, None]
         self.done = False
-
-    def reset(self):
-        if not self.is_running:
-            self.game.run()
-            self.is_running = True
-        else:
-            self.game.hand.p1.cards.clear()
-            self.game.hand.p2.cards.clear()
-            self.game.hand.p1.current_bet = 0
-            self.game.hand.p2.current_bet = 0
-            self.game.hand.p1.total_bet = 0
-            self.game.hand.p2.total_bet = 0
-            self.game.hand.p1.fold = False
-            self.game.hand.p2.fold = False
-            self.game.hand.p1.all_in = False
-            self.game.hand.p2.all_in = False
-            self.game.hand.p1.check = False
-            self.game.hand.p2.check = False
-            self.game.pot_size.size = 0
-            self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
-
+        self.dealt_hole_cards = False
         for i in range(2):
             for j in range(2):
                 self.player_hands[i][j] = ((value_dict[self.game.hand.dealer.player_list[i].cards[j].data.value] - 2) +
                                            (13 * suit_dict[self.game.hand.dealer.player_list[i].cards[j].data.suit]))
+
+        return self.get_state()
 
     """
         # Initialize the deck: 52 cards represented by numbers 0-51
@@ -82,6 +80,9 @@ class SimplePokerEnv:
         return state
 
     def step(self, action):
+        if not self.dealt_hole_cards:
+            self.game.hand.dealer.deal_hole_cards()
+            self.dealt_hole_cards = True
 
         if action not in [0, 1, 2]:
             raise ValueError("Invalid action")
@@ -147,6 +148,21 @@ class SimplePokerEnv:
     def calculate_rewards(self):
         # Simple hand evaluation: sum of card ranks
         # In a real game, you'd use proper hand rankings
+        eval_cards = ([card_id.id for card_id in self.game.player_list[0].cards] + [card_id.id for card_id in
+                                                                                    self.game.hand.dealer.flop.cards] + [
+                          card_id.id for card_id in self.game.hand.dealer.flop.cards] +
+                      [card_id.id for card_id in self.game.player_list[1].cards])
+
+        self.game.hand.dealer.determined_winner = self.game.hand.dealer.eval_winner(eval_cards)
+
+        if self.game.hand.dealer.determined_winner == "Player 1":
+            return [self.game.pot_size.size / 2, -self.game.pot_size.size]
+        elif self.game.hand.dealer.determined_winner == "Player 2":
+            return [-self.game.pot_size.size / 2, self.game.pot_size.size]
+        else:
+            return [0, 0]
+
+        """
         player_scores = []
         for i in range(2):
             hand = self.player_hands[i] + self.community_cards
@@ -163,6 +179,7 @@ class SimplePokerEnv:
         else:
             # Tie
             return [0, 0]
+        """
 
     def is_game_over(self):
         if self.game.hand.dealer.overall_winner is not None:

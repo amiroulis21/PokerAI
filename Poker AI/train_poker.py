@@ -44,7 +44,9 @@ def train_agents(episodes=1000):
     for episode in range(episodes):
         state = env.reset()
         done = False
+        env.game.hand.update()
         while not done:
+
             current_player = state['current_player']
             state_vector = preprocess_state(state)
             if current_player == 0:
@@ -72,6 +74,8 @@ def train_agents(episodes=1000):
             if env.is_game_over():
                 done = True
 
+            env.game.hand.update()
+
         # Update target networks periodically
         if episode % 10 == 0:
             agent0.update_target_model()
@@ -80,9 +84,15 @@ def train_agents(episodes=1000):
         if episode % 100 == 0:
             print(f"Episode {episode}, Epsilon {agent0.epsilon}")
 
+        if env.is_game_over():
+            env.game.p1.chips = 1000
+            env.game.p2.chips = 1000
+
     # Save models
     torch.save(agent0.model.state_dict(), 'agent0_model.pth')
     torch.save(agent1.model.state_dict(), 'agent1_model.pth')
+
+
 
 
 if __name__ == '__main__':
