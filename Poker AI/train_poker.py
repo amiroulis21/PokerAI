@@ -44,26 +44,10 @@ def train_agents(episodes=1000):
     agent1 = DQNAgent(input_size, hidden_size, action_size)
 
     for episode in range(episodes):
-        env.reset()
-        start_time = pygame.time.get_ticks()
-        delta_time = (pygame.time.get_ticks() - start_time) / 1000
-        env.game.start_time = pygame.time.get_ticks()
-        #env.game.screen.fill(BG_COLOR)
-        card_counter = 0
-        while card_counter < 4:
-            env.game.hand.dealer.deal_hole_cards()
-            env.game.hand.dealer.cooldowns()
-            card_counter = env.game.hand.dealer.dealt_cards
-            pygame.display.update()
-            env.game.hand.update()
-            env.game.clock.tick(FPS)
+
+        env.game.hand.dealer.deal_hole_cards()
         env.deal_hand()
-
         env.game.hand.update()
-        pygame.display.update()
-
-        env.game.clock.tick(FPS)
-
         done = False
 
         state = env.get_state()

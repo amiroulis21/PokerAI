@@ -152,42 +152,12 @@ class Dealer():
             card.animation_complete = True
 
     def deal_hole_cards(self):
-        if self.can_deal:
-            #print("Enter dealholecard")
-            # Deal card to current player's hand
+        for i in range(4):
             current_player = self.players_list[self.current_player_index]
             current_player.cards.append(self.deck[-1])
-            #print(f"Dealt card to player {self.current_player_index + 1}")
-
-            # Card one of two; sets positions for both players
-            if self.current_player_index == 0:
-                if len(current_player.cards) == 1:
-                    current_player.cards[0].position = (P1_C1[0], current_player.cards[0].card_y)
-                elif len(current_player.cards) == 2:
-                    current_player.cards[1].position = (P1_C2[0], current_player.cards[1].card_y)
-                self.animating_card = current_player.cards[-1]
-            # Card two of two
-            elif self.current_player_index == 1:
-                if len(current_player.cards) == 1:
-                    current_player.cards[0].position = (
-                        (P2_C1[0] - current_player.cards[0].card_surf.get_width() - 80), current_player.cards[0].card_y)
-                elif len(current_player.cards) == 2:
-                    current_player.cards[1].position = (
-                        (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
-                self.animating_card = current_player.cards[-1]
-            self.dealt_cards = self.update_dealt_card_count()
-            if self.animating_card:
-                self.last_dealt_card_time = pygame.time.get_ticks()
-                self.animate_hole_card(self.animating_card)
-
-            # Play audio
-            #self.card_audio()
-
             # Remove dealt card from deck; change player index; prompt card dealing cooldown
             self.deck.pop(-1)
             self.current_player_index = (self.current_player_index + 1) % self.num_players
-            print(self.current_player_index + 1)
-            self.can_deal = False
 
     def deal_flop(self):
         # Set flop card locations
