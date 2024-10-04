@@ -53,9 +53,10 @@ def train_agents(episodes=1000):
         while card_counter < 4:
             env.game.hand.dealer.deal_hole_cards()
             env.game.hand.dealer.cooldowns()
-            # self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
-
             card_counter = env.game.hand.dealer.dealt_cards
+            pygame.display.update()
+            env.game.hand.update()
+            env.game.clock.tick(FPS)
         env.deal_hand()
 
         env.game.hand.update()
