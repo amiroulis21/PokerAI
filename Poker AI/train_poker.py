@@ -6,7 +6,6 @@ import torch
 import pygame, pygame_widgets
 
 
-
 def preprocess_state(state):
     # Convert state dictionary to a flat numpy array
     hand = state['hand']
@@ -50,8 +49,8 @@ def train_agents(episodes=1000):
         env.game.start_time = pygame.time.get_ticks()
         pygame.display.update()
         env.game.screen.fill(BG_COLOR)
-        env.game.clock.tick(FPS)
         env.game.hand.update()
+        env.game.clock.tick(FPS)
         state = env.reset()
         done = False
 
@@ -84,8 +83,9 @@ def train_agents(episodes=1000):
             if env.is_game_over():
                 done = True
 
-            env.game.hand.update()
             pygame.display.update()
+            env.game.hand.update()
+            env.game.clock.tick(FPS)
 
         # Update target networks periodically
         if episode % 10 == 0:
