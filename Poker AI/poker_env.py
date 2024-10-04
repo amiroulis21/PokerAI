@@ -99,8 +99,10 @@ class SimplePokerEnv:
             bet_amount = min(self.game.amount_to_call, self.game.player_list[self.current_player].chips)
             if bet_amount > 0:
                 self.game.call(self.game.player_list[self.current_player], bet_amount)
-            elif bet_amount == 0:
+            elif self.game.amount_to_call == 0:
                 self.game.check(self.game.player_list[self.current_player])
+
+
 
         elif action == 2:
             # Player bets/raises

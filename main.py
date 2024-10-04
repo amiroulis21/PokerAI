@@ -42,9 +42,6 @@ class Pot:
 
 class Game:
 
-
-
-
     def __init__(self):
 
         # General setup
