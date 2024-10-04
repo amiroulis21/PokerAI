@@ -85,6 +85,7 @@ def train_agents(episodes=1000):
                 done = True
 
             env.game.hand.update()
+            pygame.display.update()
 
         # Update target networks periodically
         if episode % 10 == 0:

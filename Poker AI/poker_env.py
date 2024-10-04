@@ -25,15 +25,22 @@ class SimplePokerEnv:
         self.game.pot_size.size = 0
         self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
         card_counter = 0
-        previous_card_counter = card_counter
+        previous_card_counter = card_counter - 1
+        player = 0
         while card_counter < 4:
             self.game.hand.dealer.deal_hole_cards()
             self.game.hand.dealer.cooldowns()
             #self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
-            if previous_card_counter != card_counter:
-                print(f"P{card_counter % 2} card: {self.game.player_list[card_counter % 2].cards[int(card_counter / 2)].id}")
+
             previous_card_counter = card_counter
             card_counter = self.game.hand.dealer.dealt_cards
+            """
+            if previous_card_counter != card_counter:
+                print(f"P{player + 1} card: {self.game.player_list[player].cards[int(previous_card_counter / 2)].id}")
+                player = card_counter % 2
+            """
+
+
 
         self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
@@ -44,8 +51,8 @@ class SimplePokerEnv:
         self.dealt_hole_cards = False
         for i in range(2):
             for j in range(2):
-                print(f"P{i+1}, Card{j+1}")
-                self.player_hands[i][j] = ((value_dict[self.game.player_list[i].cards[j].data.value] - 2) +
+                #print(f"P{i+1}, Card{j+1}")
+                self.player_hands[i][j] = ((value_dict[str(self.game.player_list[i].cards[j].data.value)] - 2) +
                                            (13 * suit_dict[self.game.player_list[i].cards[j].data.suit]))
 
         return self.get_state()
@@ -82,7 +89,7 @@ class SimplePokerEnv:
         state = {
             'hand': self.player_hands[self.current_player],
             'community': self.community_cards,
-            'pot': self.game.pot_size,
+            'pot': self.game.pot_size.size,
             'bets': [self.game.p1.current_bet, self.game.p2.current_bet],
             'chip_stacks': [self.game.p1.chips, self.game.p2.chips],
             'current_player': self.current_player,
@@ -102,7 +109,12 @@ class SimplePokerEnv:
         if action == 0:
             self.game.fold(self.game.player_list[self.current_player])
             self.game.hand.dealer.eval_folds()
+            reward = [-self.game.player_list[self.current_player].current_bet,
+                      self.game.pot_size.size / 2] if self.current_player == 0 else [
+                self.game.pot_size.size / 2, -self.game.player_list[1 - self.current_player].current_bet]
+            next_state = None
             self.done = True
+            return next_state, reward, self.done
 
         if action == 1:
             # Player checks/calls
@@ -127,6 +139,7 @@ class SimplePokerEnv:
 
         if self.is_betting_round_over():
             if self.phase == 0:
+                self.game.hand.dealer.can_deal_flop = True
                 self.game.hand.dealer.deal_flop()
                 self.phase = 1
                 for i in range(3):

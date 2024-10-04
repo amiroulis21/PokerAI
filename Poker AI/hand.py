@@ -122,9 +122,9 @@ class Dealer():
     def cooldowns(self):
         # Need to use delta time
         current_time = pygame.time.get_ticks()
-        print(self.last_dealt_card_time)
-        print(current_time)
-        print(self.last_dealt_card_time and current_time)
+        #print(self.last_dealt_card_time)
+        #print(current_time)
+        #print(self.last_dealt_card_time and current_time)
         if self.last_dealt_card_time and current_time - 200 > self.last_dealt_card_time:
             print("can_deal")
             self.can_deal = True
@@ -153,11 +153,11 @@ class Dealer():
 
     def deal_hole_cards(self):
         if self.can_deal:
-            print("Enter dealholecard")
+            #print("Enter dealholecard")
             # Deal card to current player's hand
             current_player = self.players_list[self.current_player_index]
             current_player.cards.append(self.deck[-1])
-            print(f"Dealt card to player {self.current_player_index + 1}")
+            #print(f"Dealt card to player {self.current_player_index + 1}")
 
             # Card one of two; sets positions for both players
             if self.current_player_index == 0:
@@ -186,6 +186,7 @@ class Dealer():
             # Remove dealt card from deck; change player index; prompt card dealing cooldown
             self.deck.pop(-1)
             self.current_player_index = (self.current_player_index + 1) % self.num_players
+            print(self.current_player_index + 1)
             self.can_deal = False
 
     def deal_flop(self):
@@ -280,15 +281,11 @@ class Dealer():
         if self.players_list[0].fold or self.players_list[1].fold:
             if self.players_list[0].fold:
                 self.determined_winner = "Player 2"
-                self.players_list[1].chips += self.players_list[1].total_bet * 2
-                self.pot_size.size -= self.players_list[1].total_bet * 2
-                self.players_list[0].chips += self.pot_size.size
+                self.players_list[1].chips += self.pot_size.size
                 print("P2 WIN")
             elif self.players_list[1].fold:
                 self.determined_winner = "Player 1"
-                self.players_list[0].chips += self.players_list[0].total_bet * 2
-                self.pot_size.size -= self.players_list[0].total_bet * 2
-                self.players_list[1].chips += self.pot_size.size
+                self.players_list[0].chips += self.pot_size.size
                 print("P1 WIN")
             print(f"P1 {self.players_list[0].chips}")
             print(f"P2 {self.players_list[1].chips}")
