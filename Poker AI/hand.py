@@ -122,7 +122,11 @@ class Dealer():
     def cooldowns(self):
         # Need to use delta time
         current_time = pygame.time.get_ticks()
+        print(self.last_dealt_card_time)
+        print(current_time)
+        print(self.last_dealt_card_time and current_time)
         if self.last_dealt_card_time and current_time - 200 > self.last_dealt_card_time:
+            print("can_deal")
             self.can_deal = True
 
         if self.last_dealt_flop_time and \
@@ -149,9 +153,11 @@ class Dealer():
 
     def deal_hole_cards(self):
         if self.can_deal:
+            print("Enter dealholecard")
             # Deal card to current player's hand
             current_player = self.players_list[self.current_player_index]
             current_player.cards.append(self.deck[-1])
+            print(f"Dealt card to player {self.current_player_index + 1}")
 
             # Card one of two; sets positions for both players
             if self.current_player_index == 0:
@@ -169,7 +175,7 @@ class Dealer():
                     current_player.cards[1].position = (
                         (P2_C2[0] - current_player.cards[1].card_surf.get_width() - 20), current_player.cards[1].card_y)
                 self.animating_card = current_player.cards[-1]
-
+            self.dealt_cards = self.update_dealt_card_count()
             if self.animating_card:
                 self.last_dealt_card_time = pygame.time.get_ticks()
                 self.animate_hole_card(self.animating_card)

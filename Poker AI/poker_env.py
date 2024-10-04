@@ -24,10 +24,17 @@ class SimplePokerEnv:
         self.game.hand.p2.check = False
         self.game.pot_size.size = 0
         self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
-        for c in range(4):
+        card_counter = 0
+        previous_card_counter = card_counter
+        while card_counter < 4:
             self.game.hand.dealer.deal_hole_cards()
             self.game.hand.dealer.cooldowns()
-            self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
+            #self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
+            if previous_card_counter != card_counter:
+                print(f"P{card_counter % 2} card: {self.game.player_list[card_counter % 2].cards[int(card_counter / 2)].id}")
+            previous_card_counter = card_counter
+            card_counter = self.game.hand.dealer.dealt_cards
+
         self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
         self.community_cards = []
@@ -37,6 +44,7 @@ class SimplePokerEnv:
         self.dealt_hole_cards = False
         for i in range(2):
             for j in range(2):
+                print(f"P{i+1}, Card{j+1}")
                 self.player_hands[i][j] = ((value_dict[self.game.player_list[i].cards[j].data.value] - 2) +
                                            (13 * suit_dict[self.game.player_list[i].cards[j].data.suit]))
 

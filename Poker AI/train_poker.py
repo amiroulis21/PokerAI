@@ -1,7 +1,10 @@
 from poker_env import SimplePokerEnv
 from dqn import DQNAgent
+from settings import *
 import numpy as np
 import torch
+import pygame, pygame_widgets
+
 
 
 def preprocess_state(state):
@@ -42,9 +45,16 @@ def train_agents(episodes=1000):
     agent1 = DQNAgent(input_size, hidden_size, action_size)
 
     for episode in range(episodes):
+        start_time = pygame.time.get_ticks()
+        delta_time = (pygame.time.get_ticks() - start_time) / 1000
+        env.game.start_time = pygame.time.get_ticks()
+        pygame.display.update()
+        env.game.screen.fill(BG_COLOR)
+        env.game.clock.tick(FPS)
+        env.game.hand.update()
         state = env.reset()
         done = False
-        env.game.hand.update()
+
         while not done:
 
             current_player = state['current_player']
@@ -91,8 +101,6 @@ def train_agents(episodes=1000):
     # Save models
     torch.save(agent0.model.state_dict(), 'agent0_model.pth')
     torch.save(agent1.model.state_dict(), 'agent1_model.pth')
-
-
 
 
 if __name__ == '__main__':
