@@ -44,15 +44,28 @@ def train_agents(episodes=1000):
     agent1 = DQNAgent(input_size, hidden_size, action_size)
 
     for episode in range(episodes):
+        env.reset()
         start_time = pygame.time.get_ticks()
         delta_time = (pygame.time.get_ticks() - start_time) / 1000
         env.game.start_time = pygame.time.get_ticks()
-        pygame.display.update()
-        env.game.screen.fill(BG_COLOR)
+        #env.game.screen.fill(BG_COLOR)
+        card_counter = 0
+        while card_counter < 4:
+            env.game.hand.dealer.deal_hole_cards()
+            env.game.hand.dealer.cooldowns()
+            # self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
+
+            card_counter = env.game.hand.dealer.dealt_cards
+        env.deal_hand()
+
         env.game.hand.update()
+        pygame.display.update()
+
         env.game.clock.tick(FPS)
-        state = env.reset()
+
         done = False
+
+        state = env.get_state()
 
         while not done:
 
@@ -82,10 +95,9 @@ def train_agents(episodes=1000):
 
             if env.is_game_over():
                 done = True
-
-            pygame.display.update()
-            env.game.screen.fill(BG_COLOR)
+            #env.game.screen.fill(BG_COLOR)
             env.game.hand.update()
+            pygame.display.update()
             env.game.clock.tick(FPS)
 
         # Update target networks periodically

@@ -24,24 +24,6 @@ class SimplePokerEnv:
         self.game.hand.p2.check = False
         self.game.pot_size.size = 0
         self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
-        card_counter = 0
-        previous_card_counter = card_counter - 1
-        player = 0
-        while card_counter < 4:
-            self.game.hand.dealer.deal_hole_cards()
-            self.game.hand.dealer.cooldowns()
-            #self.game.hand.dealer.animate_hole_card(self.game.hand.dealer.animating_card)
-
-            previous_card_counter = card_counter
-            card_counter = self.game.hand.dealer.dealt_cards
-            """
-            if previous_card_counter != card_counter:
-                print(f"P{player + 1} card: {self.game.player_list[player].cards[int(previous_card_counter / 2)].id}")
-                player = card_counter % 2
-            """
-
-
-
         self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
         self.community_cards = []
@@ -49,13 +31,8 @@ class SimplePokerEnv:
         self.last_actions = [None, None]
         self.done = False
         self.dealt_hole_cards = False
-        for i in range(2):
-            for j in range(2):
-                #print(f"P{i+1}, Card{j+1}")
-                self.player_hands[i][j] = ((value_dict[str(self.game.player_list[i].cards[j].data.value)] - 2) +
-                                           (13 * suit_dict[self.game.player_list[i].cards[j].data.suit]))
 
-        return self.get_state()
+
 
     """
         # Initialize the deck: 52 cards represented by numbers 0-51
@@ -76,7 +53,11 @@ class SimplePokerEnv:
     """
 
     def deal_hand(self):
-        return [self.deck.pop(), self.deck.pop()]
+        for i in range(2):
+            for j in range(2):
+                #print(f"P{i+1}, Card{j+1}")
+                self.player_hands[i][j] = ((value_dict[str(self.game.player_list[i].cards[j].data.value)] - 2) +
+                                           (13 * suit_dict[self.game.player_list[i].cards[j].data.suit]))
 
     def get_state(self):
         # For simplicity, state includes:
