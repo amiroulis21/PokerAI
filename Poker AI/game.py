@@ -4,8 +4,7 @@ import pygame_widgets
 import sys
 import random
 
-
-from hand import *
+from new_hand import *
 from settings import *
 from button import *
 from pygame_widgets.textbox import TextBox
@@ -13,15 +12,11 @@ from pygame_widgets.textbox import TextBox
 # Maintain resolution regardless of Windows scaling settings
 ctypes.windll.user32.SetProcessDPIAware()
 
-
-
-
 bet_button = Button(390, 1000, 100, 75)
 check_button = Button(280, 1000, 100, 75)
 call_button = Button(500, 1000, 100, 75)
 raise_button = Button(610, 1000, 100, 75)
 fold_button = Button(720, 1000, 100, 75)
-
 
 
 class Player:
@@ -36,14 +31,13 @@ class Player:
         self.all_in = False
         self.check = False
 
+
 class Pot:
     def __init__(self):
         self.size = 0
 
+
 class Game:
-
-
-
 
     def __init__(self):
 
@@ -59,8 +53,9 @@ class Game:
         self.hand = Hand(self.p1, self.p2, self.pot_size)
         self.ante = 5
         self.bet_exists = False
-        self.betting_state = 0 # 0 = no one has bet, player bets are equal, or both players are all in, 1 = waiting on player2 to call, -1 = waiting on player1 to call
-        self.turn = 1 # 1 = player1 to act, -1 = player2 to act
+        self.betting_state = 0  # 0 = no one has bet, player bets are equal, or both players are all in, 1 = waiting on player2 to call, -1 = waiting on player1 to call
+        self.turn = 1
+        self.round = 1# 1 = player1 to act, -1 = player2 to act
         #self.total_current_bet = 0
         self.amount_to_call = 0
         bet_button.setButton('Bet', self.bet)
@@ -71,17 +66,15 @@ class Game:
         self.bet_text = TextBox(self.screen, 390, 915, 100, 75, fontSize=40, borderColour=(0, 0, 0),
                                 textColour=(0, 0, 0))
         self.raise_text = TextBox(self.screen, 610, 915, 100, 75, fontSize=40, borderColour=(0, 0, 0),
-                                textColour=(0, 0, 0))
-
-
-
+                                  textColour=(0, 0, 0))
 
     def bet_process(self):
         mousePos = pygame.mouse.get_pos()
         bet_button.buttonSurface.fill(bet_button.fillColors['normal'])
         if bet_button.buttonRect.collidepoint(mousePos):
             bet_button.buttonSurface.fill(bet_button.fillColors['hover'])
-            if pygame.mouse.get_pressed(num_buttons=3)[0] and self.turn == 1 and self.betting_state == 0 and bet_button.alreadyPressed == False:
+            if pygame.mouse.get_pressed(num_buttons=3)[
+                0] and self.turn == 1 and self.betting_state == 0 and bet_button.alreadyPressed == False:
                 bet_button.buttonSurface.fill(bet_button.fillColors['pressed'])
                 bet_button.alreadyPressed = True
                 print(self.turn)
@@ -145,7 +138,8 @@ class Game:
         raise_button.buttonSurface.fill(raise_button.fillColors['normal'])
         if raise_button.buttonRect.collidepoint(mousePos):
             raise_button.buttonSurface.fill(raise_button.fillColors['hover'])
-            if pygame.mouse.get_pressed(num_buttons=3)[0] and self.turn == 1 and self.betting_state == -1 and raise_button.alreadyPressed == False:
+            if pygame.mouse.get_pressed(num_buttons=3)[
+                0] and self.turn == 1 and self.betting_state == -1 and raise_button.alreadyPressed == False:
                 raise_button.buttonSurface.fill(raise_button.fillColors['pressed'])
                 raise_button.alreadyPressed = True
                 print(self.turn)
@@ -171,7 +165,8 @@ class Game:
         fold_button.buttonSurface.fill(fold_button.fillColors['normal'])
         if fold_button.buttonRect.collidepoint(mousePos):
             fold_button.buttonSurface.fill(fold_button.fillColors['hover'])
-            if pygame.mouse.get_pressed(num_buttons=3)[0] and fold_button.alreadyPressed == False and self.turn == 1 and self.hand.dealer.determined_winner == None:
+            if pygame.mouse.get_pressed(num_buttons=3)[
+                0] and fold_button.alreadyPressed == False and self.turn == 1 and self.hand.dealer.determined_winner == None:
                 fold_button.alreadyPressed = True
                 fold_button.onclickFunction(self.hand.p1)
             if not pygame.mouse.get_pressed(num_buttons=3)[0]:
@@ -181,11 +176,6 @@ class Game:
             fold_button.buttonRect.height / 2 - fold_button.buttonSurf.get_rect().height / 2
         ])
         self.screen.blit(fold_button.buttonSurface, fold_button.buttonRect)
-
-
-
-
-
 
     def run(self):
         self.start_time = pygame.time.get_ticks()
@@ -252,8 +242,6 @@ class Game:
 
                         self.hand = Hand(self.hand.p1, self.hand.p2, self.pot_size)
 
-
-
             # Time variables
             self.delta_time = (pygame.time.get_ticks() - self.start_time) / 1000
             self.start_time = pygame.time.get_ticks()
@@ -274,9 +262,12 @@ class Game:
             self.hand.p1.all_in = True
         elif self.hand.p2.chips <= 0:
             self.hand.p2.all_in = True
+        print(f"\nROUND {self.round}")
+        print("P1 antes 5")
+        print("P2 antes 5")
         print(f"P1 {self.hand.p1.chips}")
         print(f"P2 {self.hand.p2.chips}")
-
+        self.round += 1
 
     def call(self, player=Player, amount=int):
         player.chips -= amount
@@ -291,17 +282,16 @@ class Game:
         print(f"P{player.id} calls")
         print(f"P{player.id} {player.chips}")
 
-
-
     def bet(self, player=Player, amount=int):
         player.chips -= amount
         player.current_bet += amount
         player.total_bet += amount
         self.bet_exists = True
         self.pot_size.size += amount
-        print(f"P{player.id} bet {player.current_bet}")
+        print(f"P{player.id} bet {amount}")
         print(f"P{player.id} {player.chips}")
-        self.amount_to_call = max(self.p1.current_bet, self.p2.current_bet) - min(self.p1.current_bet, self.p2.current_bet)
+        self.amount_to_call = max(self.p1.current_bet, self.p2.current_bet) - min(self.p1.current_bet,
+                                                                                  self.p2.current_bet)
         if player.chips <= 0:
             player.all_in = True
         self.turn *= -1
@@ -327,27 +317,17 @@ class Game:
         self.pot_size.size += amount
         if player.chips <= 0:
             player.all_in = True
-        print(f"P{player.id} bet {player.current_bet}")
+        print(f"P{player.id} raises to {player.current_bet}")
         print(f"P{player.id} {player.chips}")
         self.amount_to_call = max(self.p1.current_bet, self.p2.current_bet) - min(self.p1.current_bet,
                                                                                   self.p2.current_bet)
         self.turn *= -1
 
-
     def check(self, player=Player):
+        print(f"P{player.id} checks")
         self.turn *= -1
         player.check = True
 
     def fold(self, player=Player):
+        print(f"P{player.id} folds")
         player.fold = True
-
-
-
-
-
-
-
-
-
-
-

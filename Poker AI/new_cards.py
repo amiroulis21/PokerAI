@@ -22,6 +22,7 @@ class Card:
         self.orig_position = self.start_position
         self.data = CardTuple(value=input_value, suit=input_suit)
         self.id = f"{self.data.value}{self.data.suit}"
+        '''
         self.img = f"graphics/cards/{self.id}.png"
         self.card_rotation_angle = random.uniform(-3, 3)
         self.card_img = pygame.image.load(self.img)
@@ -36,6 +37,7 @@ class Card:
 
         # Random y value for card
         self.card_y = (P1_C1[1] - self.card_surf.get_height() // 2) + random.randint(-20, 20)
+        '''
 
 
 

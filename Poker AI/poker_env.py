@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from main import Game, Hand, Player, Pot
+from game import Game, Hand, Player, Pot
 from settings import *
 
 
@@ -80,9 +80,6 @@ class SimplePokerEnv:
         return state
 
     def step(self, action):
-        if not self.dealt_hole_cards:
-            self.game.hand.dealer.deal_hole_cards()
-            self.dealt_hole_cards = True
 
         if action not in [0, 1, 2]:
             raise ValueError("Invalid action")
@@ -116,14 +113,14 @@ class SimplePokerEnv:
             else:
                 self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                                     self.game.player_list[
-                                                                                        self.current_player].chips))
-
+                                                                                  self.current_player].chips))
+        self.last_actions[self.current_player] = action
         if self.is_betting_round_over():
             if self.phase == 0:
                 self.game.hand.dealer.deal_flop()
                 self.phase = 1
                 for i in range(3):
-                    self.community_cards[i] = (
+                    self.community_cards.append(
                             (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                             (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
                 self.game.p1.current_bet = 0

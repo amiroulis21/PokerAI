@@ -1,5 +1,5 @@
 import itertools, os, pygame, random
-from cards import *
+from new_cards import *
 from settings import *
 
 # Audio
@@ -14,10 +14,10 @@ channels = [pygame.mixer.Channel(i) for i in range(num_channels)]
 
 class Hand:
     def __init__(self, p1, p2, pot_size):
-        self.display_surface = pygame.display.get_surface()
+        #self.display_surface = pygame.display.get_surface()
         self.winner = None
-        self.font = pygame.font.Font(GAME_FONT, 120)
-        self.win_rotation_angle = random.uniform(-10, 10)
+        #self.font = pygame.font.Font(GAME_FONT, 120)
+        #self.win_rotation_angle = random.uniform(-10, 10)
         self.p1 = p1
         self.p2 = p2
         self.pot_size = pot_size
