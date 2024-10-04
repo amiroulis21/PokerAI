@@ -120,12 +120,11 @@ class SimplePokerEnv:
 
         if self.is_betting_round_over():
             if self.phase == 0:
-                self.game.hand.dealer.can_deal_flop = True
                 self.game.hand.dealer.deal_flop()
                 self.phase = 1
                 for i in range(3):
                     self.community_cards[i] = (
-                            (value_dict[self.game.hand.dealer.flop.cards[i].data.value] - 2) +
+                            (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                             (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
                 self.game.p1.current_bet = 0
                 self.game.p2.current_bet = 0

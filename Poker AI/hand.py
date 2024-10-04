@@ -155,6 +155,7 @@ class Dealer():
         for i in range(4):
             current_player = self.players_list[self.current_player_index]
             current_player.cards.append(self.deck[-1])
+            self.dealt_cards = self.update_dealt_card_count()
             # Remove dealt card from deck; change player index; prompt card dealing cooldown
             self.deck.pop(-1)
             self.current_player_index = (self.current_player_index + 1) % self.num_players
@@ -162,25 +163,11 @@ class Dealer():
     def deal_flop(self):
         # Set flop card locations
 
-        while self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
-            flop_x = self.players_list[0].cards[0].card_surf.get_width()
-            if self.current_flop_index == 0:
-                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2
-            elif self.current_flop_index == 1:
-                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
-                        self.players_list[0].cards[0].card_surf.get_width() + 20)
-            elif self.current_flop_index == 2:
-                flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (
-                        self.players_list[0].cards[0].card_surf.get_width() * 2 + 40)
-
+        while self.dealt_cards - (self.num_players * 2) < 3:
             self.flop.cards.append(self.deck[-1])
-            self.flop.cards[self.current_flop_index].position = (
-                flop_x, self.flop.cards[self.current_flop_index].card_y)
             self.deck.pop(-1)
             self.last_dealt_flop_time = pygame.time.get_ticks()
             self.dealt_cards += 1
-            self.current_flop_index += 1
-        self.can_deal_flop = False
 
         # Print length of deck after card is dealt for troubleshooting
         # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
