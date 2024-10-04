@@ -84,6 +84,7 @@ def train_agents(episodes=1000):
                 done = True
 
             pygame.display.update()
+            env.game.screen.fill(BG_COLOR)
             env.game.hand.update()
             env.game.clock.tick(FPS)
 

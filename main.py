@@ -260,8 +260,8 @@ class Game:
             pygame_widgets.update(events)
             pygame.display.update()
             self.screen.fill(BG_COLOR)
-
             self.hand.update()
+
             self.clock.tick(FPS)
 
     def ante_up(self):
