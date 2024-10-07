@@ -81,7 +81,7 @@ class SimplePokerEnv:
 
     def step(self, action):
 
-        if action not in [0, 1, 2]:
+        if action not in [0, 1, 2, 3]:
             raise ValueError("Invalid action")
         # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet/Raise
         if action == 0:
@@ -99,23 +99,34 @@ class SimplePokerEnv:
             bet_amount = min(self.game.amount_to_call, self.game.player_list[self.current_player].chips)
             if bet_amount > 0:
                 self.game.call(self.game.player_list[self.current_player], bet_amount)
+                #if self.game.player_list[self.current_player].all_in:
+                    #do stuff
             elif self.game.amount_to_call == 0:
                 self.game.check(self.game.player_list[self.current_player])
-
 
 
         elif action == 2:
             # Player bets/raises
             bet_amount = 10
-            raise_amount = self.game.amount_to_call + bet_amount  # Fixed bet/raise amount
-            if self.game.betting_state == 0:
-                self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
+
+            self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
                                                                               self.game.player_list[
                                                                                   self.current_player].chips))
+            if self.current_player == 0:
+                betting_state = 1
             else:
-                self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
-                                                                                    self.game.player_list[
-                                                                                  self.current_player].chips))
+                betting_state = -1
+
+        elif action == 3:
+            raise_amount = self.game.amount_to_call * 2
+            self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
+                                                                                self.game.player_list[
+                                                                            self.current_player].chips))
+            if self.current_player == 0:
+                betting_state = 1
+            else:
+                betting_state = -1
+
         self.last_actions[self.current_player] = action
         if self.is_betting_round_over():
             if self.phase == 0:
@@ -160,9 +171,9 @@ class SimplePokerEnv:
         self.game.hand.dealer.determined_winner = self.game.hand.dealer.eval_winner(eval_cards)
 
         if self.game.hand.dealer.determined_winner == "Player 1":
-            return [self.game.pot_size.size / 2, -self.game.pot_size.size]
+            return [self.game.pot_size.size / 2, -self.game.pot_size.size / 2]
         elif self.game.hand.dealer.determined_winner == "Player 2":
-            return [-self.game.pot_size.size / 2, self.game.pot_size.size]
+            return [-self.game.pot_size.size / 2, self.game.pot_size.size / 2]
         else:
             return [0, 0]
 

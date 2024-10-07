@@ -27,7 +27,7 @@ def preprocess_state(state):
     chip_stacks = np.array(chip_stacks) / 1000.0
 
     # Convert last actions (None to -1, 0: Fold, 1: Check/Call, 2: Bet/Raise)
-    action_mapping = {None: -1, 0: 0, 1: 1, 2: 2}
+    action_mapping = {None: -1, 0: 0, 1: 1, 2: 2, 3: 3}
     last_actions = [action_mapping[a] for a in last_actions]
 
     state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
@@ -38,7 +38,7 @@ def train_agents(episodes=1000):
     env = SimplePokerEnv()
     input_size = 14
     hidden_size = 128
-    action_size = 3  # Actions: Fold, Check/Call, Bet/Raise
+    action_size = 4  # Actions: Fold, Check/Call, Bet, Raise
 
     agent0 = DQNAgent(input_size, hidden_size, action_size)
     agent1 = DQNAgent(input_size, hidden_size, action_size)
@@ -85,6 +85,8 @@ def train_agents(episodes=1000):
 
             if env.is_game_over():
                 done = True
+                env.game.p1.chips = 1000
+                env.game.p2.chips = 1000
             #env.game.screen.fill(BG_COLOR)
             #env.game.hand.update()
             #pygame.display.update()
@@ -98,9 +100,8 @@ def train_agents(episodes=1000):
         if episode % 100 == 0:
             print(f"Episode {episode}, Epsilon {agent0.epsilon}")
 
-        if env.is_game_over():
-            env.game.p1.chips = 1000
-            env.game.p2.chips = 1000
+
+
 
     # Save models
     torch.save(agent0.model.state_dict(), 'agent0_model.pth')

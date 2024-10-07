@@ -35,6 +35,7 @@ class DQNAgent:
             return random.randrange(self.action_size)
         state_tensor = torch.FloatTensor(state)
         q_values = self.model(state_tensor)
+        #a = torch.argmax(q_values).item()
         return torch.argmax(q_values).item()
 
     def replay(self):
