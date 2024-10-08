@@ -31,6 +31,7 @@ class SimplePokerEnv:
         self.last_actions = [None, None]
         self.done = False
         self.dealt_hole_cards = False
+        self.illegal_actions = [3]
 
 
 
@@ -75,7 +76,8 @@ class SimplePokerEnv:
             'chip_stacks': [self.game.p1.chips, self.game.p2.chips],
             'current_player': self.current_player,
             'phase': self.phase,
-            'last_actions': self.last_actions
+            'last_actions': self.last_actions,
+
         }
         return state
 
@@ -92,7 +94,7 @@ class SimplePokerEnv:
                 self.game.pot_size.size / 2, -self.game.player_list[1 - self.current_player].current_bet]
             next_state = None
             self.done = True
-            return next_state, reward, self.done
+            return next_state, reward, self.done, self.illegal_actions
 
         if action == 1:
             # Player checks/calls
@@ -103,6 +105,7 @@ class SimplePokerEnv:
                     #do stuff
             elif self.game.amount_to_call == 0:
                 self.game.check(self.game.player_list[self.current_player])
+            self.illegal_actions = [3]
 
 
         elif action == 2:
@@ -116,6 +119,7 @@ class SimplePokerEnv:
                 betting_state = 1
             else:
                 betting_state = -1
+            self.illegal_actions = [2]
 
         elif action == 3:
             raise_amount = self.game.amount_to_call * 2
@@ -126,6 +130,7 @@ class SimplePokerEnv:
                 betting_state = 1
             else:
                 betting_state = -1
+            self.illegal_actions = [2]
 
         self.last_actions[self.current_player] = action
         if self.is_betting_round_over():
@@ -143,13 +148,13 @@ class SimplePokerEnv:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
-                return next_state, reward, self.done
+                return next_state, reward, self.done, self.illegal_actions
         # Switch to the other player
         self.current_player = 1 - self.current_player
 
         reward = [0, 0]
         next_state = self.get_state()
-        return next_state, reward, self.done
+        return next_state, reward, self.done, self.illegal_actions
 
     def is_betting_round_over(self):
         if self.last_actions[0] is None or self.last_actions[1] is None:

@@ -17,6 +17,7 @@ def preprocess_state(state):
     phase = [state['phase']]
     last_actions = state['last_actions']
 
+
     # Normalize the card values (0-51) to a range [0, 1]
     hand = np.array(hand) / 51.0
     community = np.array(community + [0] * (3 - len(community))) / 51.0
@@ -30,12 +31,14 @@ def preprocess_state(state):
     action_mapping = {None: -1, 0: 0, 1: 1, 2: 2, 3: 3}
     last_actions = [action_mapping[a] for a in last_actions]
 
+
     state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
     return state_vector
 
 
 def train_agents(episodes=1000):
     env = SimplePokerEnv()
+
     input_size = 14
     hidden_size = 128
     action_size = 4  # Actions: Fold, Check/Call, Bet, Raise
@@ -45,6 +48,7 @@ def train_agents(episodes=1000):
 
     for episode in range(episodes):
         env.reset()
+        illegal_actions = env.illegal_actions
         env.game.hand.dealer.deal_hole_cards()
         env.deal_hand()
         env.game.ante_up()
@@ -59,12 +63,14 @@ def train_agents(episodes=1000):
             state_vector = preprocess_state(state)
             #Loop act and step
             #step returns illegal action, big negative reward
-            if current_player == 0:
-                action = agent0.act(state_vector)
-            else:
-                action = agent1.act(state_vector)
+            action = illegal_actions[0]
+            while illegal_actions.__contains__(action):
+                if current_player == 0:
+                    action = agent0.act(state_vector)
+                else:
+                    action = agent1.act(state_vector)
 
-            next_state, reward, done = env.step(action)
+            next_state, reward, done, illegal_actions = env.step(action)
             #if action was illegal
             #next_state = state
 
