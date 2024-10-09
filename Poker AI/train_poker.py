@@ -8,6 +8,7 @@ import pygame, pygame_widgets
 
 def preprocess_state(state):
     # Convert state dictionary to a flat numpy array
+    x=2
     hand = state['hand']
     community = state['community']
     pot = [state['pot']]
@@ -76,6 +77,7 @@ def train_agents(episodes=1000):
             if done:
                 next_state_vector = None
             else:
+                check = 1
                 next_state_vector = preprocess_state(next_state)
 
             # Agents store experiences and learn

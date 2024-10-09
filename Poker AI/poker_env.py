@@ -23,6 +23,7 @@ class SimplePokerEnv:
         self.game.hand.p1.check = False
         self.game.hand.p2.check = False
         self.game.pot_size.size = 0
+        self.game.amount_to_call = 0
         self.game.hand = Hand(self.game.p1, self.game.p2, self.game.pot_size)
         self.player_hands = [[0, 0], [0, 0]]
         self.current_player = 0
@@ -85,7 +86,7 @@ class SimplePokerEnv:
 
         if action not in [0, 1, 2, 3]:
             raise ValueError("Invalid action")
-        # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet/Raise
+        # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet, 3 = Raise
         if action == 0:
             self.game.fold(self.game.player_list[self.current_player])
             self.game.hand.dealer.eval_folds()
@@ -112,7 +113,7 @@ class SimplePokerEnv:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
                 reward[self.current_player] = -10
-                return self.get_state, reward, self.done
+                return self.get_state(), reward, self.done
 
             # Player bets/raises
             bet_amount = 10
@@ -130,7 +131,7 @@ class SimplePokerEnv:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
                 reward[self.current_player] = -10
-                return self.get_state, reward, self.done
+                return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
             self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                                 self.game.player_list[
@@ -163,7 +164,7 @@ class SimplePokerEnv:
 
         reward = [0, 0]
         next_state = self.get_state()
-        return next_state, reward, self.done, self.illegal_actions
+        return next_state, reward, self.done
 
     def is_betting_round_over(self):
         if self.last_actions[0] is None or self.last_actions[1] is None:
