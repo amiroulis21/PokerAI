@@ -94,7 +94,7 @@ class SimplePokerEnv:
                 self.game.pot_size.size / 2, -self.game.player_list[1 - self.current_player].current_bet]
             next_state = None
             self.done = True
-            return next_state, reward, self.done, self.illegal_actions
+            return next_state, reward, self.done
 
         if action == 1:
             # Player checks/calls
@@ -109,6 +109,11 @@ class SimplePokerEnv:
 
 
         elif action == 2:
+            if self.illegal_actions.__contains__(action):
+                reward = [0, 0]
+                reward[self.current_player] = -10
+                return self.get_state, reward, self.done
+
             # Player bets/raises
             bet_amount = 10
 
@@ -122,6 +127,10 @@ class SimplePokerEnv:
             self.illegal_actions = [2]
 
         elif action == 3:
+            if self.illegal_actions.__contains__(action):
+                reward = [0, 0]
+                reward[self.current_player] = -10
+                return self.get_state, reward, self.done
             raise_amount = self.game.amount_to_call * 2
             self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                                 self.game.player_list[
@@ -148,7 +157,7 @@ class SimplePokerEnv:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
-                return next_state, reward, self.done, self.illegal_actions
+                return next_state, reward, self.done
         # Switch to the other player
         self.current_player = 1 - self.current_player
 

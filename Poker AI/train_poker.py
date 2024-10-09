@@ -48,7 +48,6 @@ def train_agents(episodes=1000):
 
     for episode in range(episodes):
         env.reset()
-        illegal_actions = env.illegal_actions
         env.game.hand.dealer.deal_hole_cards()
         env.deal_hand()
         env.game.ante_up()
@@ -63,14 +62,14 @@ def train_agents(episodes=1000):
             state_vector = preprocess_state(state)
             #Loop act and step
             #step returns illegal action, big negative reward
-            action = illegal_actions[0]
-            while illegal_actions.__contains__(action):
-                if current_player == 0:
-                    action = agent0.act(state_vector)
-                else:
-                    action = agent1.act(state_vector)
 
-            next_state, reward, done, illegal_actions = env.step(action)
+
+            if current_player == 0:
+                action = agent0.act(state_vector)
+            else:
+                action = agent1.act(state_vector)
+
+            next_state, reward, done = env.step(action)
             #if action was illegal
             #next_state = state
 
