@@ -240,10 +240,12 @@ class Dealer():
                 self.determined_winner = "Player 2"
                 self.players_list[1].chips += self.pot_size.size
                 print("P2 WIN")
+                self.overall_winner = self.eval_overall_winner()
             elif self.players_list[1].fold:
                 self.determined_winner = "Player 1"
                 self.players_list[0].chips += self.pot_size.size
                 print("P1 WIN")
+                self.overall_winner = self.eval_overall_winner()
             print(f"P1 {self.players_list[0].chips}")
             print(f"P2 {self.players_list[1].chips}")
 

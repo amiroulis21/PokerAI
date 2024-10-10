@@ -115,17 +115,21 @@ class SimplePokerEnv:
                 reward[self.current_player] = -10
                 return self.get_state(), reward, self.done
 
+
             # Player bets/raises
             bet_amount = 10
 
             self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
-                                                                              self.game.player_list[
-                                                                                  self.current_player].chips))
+                                                        min(self.game.player_list[self.current_player].chips,
+                                                            self.game.player_list[1 - self.current_player].chips)))
             if self.current_player == 0:
-                betting_state = 1
+                self.game.betting_state = 1
             else:
-                betting_state = -1
+                self.game.betting_state = -1
             self.illegal_actions = [2]
+            if (self.game.player_list[self.current_player].current_bet == self.game.player_list[1 - self.current_player].chips) or self.game.player_list[self.current_player].all_in:
+                self.illegal_actions.append(3)
+
 
         elif action == 3:
             if self.illegal_actions.__contains__(action):
@@ -133,14 +137,20 @@ class SimplePokerEnv:
                 reward[self.current_player] = -10
                 return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
+            if ((self.game.player_list[1 - self.current_player].current_bet + self.game.player_list[1 - self.current_player].chips) -
+                (self.game.player_list[self.current_player].current_bet + raise_amount)) < 0:
+                raise_amount = self.game.amount_to_call + self.game.player_list[1 - self.current_player].chips
             self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                                 self.game.player_list[
                                                                             self.current_player].chips))
             if self.current_player == 0:
-                betting_state = 1
+                self.game.betting_state = 1
             else:
-                betting_state = -1
+                self.game.betting_state = -1
             self.illegal_actions = [2]
+            if (self.game.player_list[self.current_player].current_bet == (self.game.player_list[1 - self.current_player].chips +
+                    self.game.player_list[1 - self.current_player].current_bet)) or self.game.player_list[self.current_player].all_in:
+                self.illegal_actions.append(3)
 
         self.last_actions[self.current_player] = action
         if self.is_betting_round_over():
