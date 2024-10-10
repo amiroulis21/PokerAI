@@ -277,6 +277,7 @@ class Game:
         self.pot_size.size += amount
         self.bet_exists = False
         self.betting_state = 0
+        self.amount_to_call = 0
         if player.chips <= 0:
             player.all_in = True
         print(f"P{player.id} calls")
