@@ -112,7 +112,7 @@ class SimplePokerEnv:
         elif action == 2:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
-                reward[self.current_player] = -10
+                reward[self.current_player] = -2000
                 return self.get_state(), reward, self.done
 
 
@@ -134,7 +134,7 @@ class SimplePokerEnv:
         elif action == 3:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
-                reward[self.current_player] = -10
+                reward[self.current_player] = -2000
                 return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
             if ((self.game.player_list[1 - self.current_player].current_bet + self.game.player_list[1 - self.current_player].chips) -
