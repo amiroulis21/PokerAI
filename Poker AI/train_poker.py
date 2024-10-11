@@ -8,7 +8,6 @@ import pygame, pygame_widgets
 
 def preprocess_state(state):
     # Convert state dictionary to a flat numpy array
-    x=2
     hand = state['hand']
     community = state['community']
     pot = [state['pot']]

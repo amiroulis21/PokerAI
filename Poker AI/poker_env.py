@@ -117,7 +117,7 @@ class SimplePokerEnv:
 
 
             # Player bets/raises
-            bet_amount = 100
+            bet_amount = 500
 
             self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
                                                         min(self.game.player_list[self.current_player].chips,
