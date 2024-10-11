@@ -62,14 +62,16 @@ def train_agents(episodes=1000):
             state_vector = preprocess_state(state)
             #Loop act and step
             #step returns illegal action, big negative reward
+            next_state = []
+            if not env.illegal_actions.__contains__(1):
+                if current_player == 0:
+                    action = agent0.act(state_vector)
+                else:
+                    action = agent1.act(state_vector)
 
-
-            if current_player == 0:
-                action = agent0.act(state_vector)
+                next_state, reward, done = env.step(action)
             else:
-                action = agent1.act(state_vector)
-
-            next_state, reward, done = env.step(action)
+                next_state, reward, done = env.resolve_game()
             #if action was illegal
             #next_state = state
 

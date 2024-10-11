@@ -35,25 +35,6 @@ class SimplePokerEnv:
         self.illegal_actions = [3]
 
 
-
-    """
-        # Initialize the deck: 52 cards represented by numbers 0-51
-
-        # Deal two cards to each player
-        self.player_hands = [self.deal_hand(), self.deal_hand()]
-        # Deal five community cards
-        self.community_cards = [self.deck.pop() for _ in range(5)]
-        # Pot starts at zero
-        self.pot = 0
-        # Bets made by players
-        self.bets = [0, 0]
-        # Current player (0 or 1)
-        self.current_player = 0
-        # Game over flag
-        self.done = False
-        return self.get_state()
-    """
-
     def deal_hand(self):
         for i in range(2):
             for j in range(2):
@@ -108,6 +89,9 @@ class SimplePokerEnv:
                 self.game.check(self.game.player_list[self.current_player])
             self.illegal_actions = [3]
 
+            if self.game.p1.all_in and self.game.p2.all_in:
+                self.illegal_actions = [0, 1, 2, 3]
+
 
         elif action == 2:
             if self.illegal_actions.__contains__(action):
@@ -117,15 +101,11 @@ class SimplePokerEnv:
 
 
             # Player bets/raises
-            bet_amount = 500
+            bet_amount = 1000
 
             self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
                                                         min(self.game.player_list[self.current_player].chips,
                                                             self.game.player_list[1 - self.current_player].chips)))
-            if self.current_player == 0:
-                self.game.betting_state = 1
-            else:
-                self.game.betting_state = -1
             self.illegal_actions = [2]
             if (self.game.player_list[self.current_player].current_bet == self.game.player_list[1 - self.current_player].chips) or self.game.player_list[self.current_player].all_in:
                 self.illegal_actions.append(3)
@@ -143,14 +123,15 @@ class SimplePokerEnv:
             self.game.raise_bet(self.game.player_list[self.current_player], min(raise_amount,
                                                                                 self.game.player_list[
                                                                             self.current_player].chips))
-            if self.current_player == 0:
-                self.game.betting_state = 1
-            else:
-                self.game.betting_state = -1
+
             self.illegal_actions = [2]
             if (self.game.player_list[self.current_player].current_bet == (self.game.player_list[1 - self.current_player].chips +
                     self.game.player_list[1 - self.current_player].current_bet)) or self.game.player_list[self.current_player].all_in:
                 self.illegal_actions.append(3)
+            if self.game.p1.all_in and self.game.p2.all_in:
+                self.illegal_actions = [0, 1, 2, 3]
+
+
 
         self.last_actions[self.current_player] = action
         if self.is_betting_round_over():
@@ -202,26 +183,24 @@ class SimplePokerEnv:
         else:
             return [0, 0]
 
-        """
-        player_scores = []
-        for i in range(2):
-            hand = self.player_hands[i] + self.community_cards
-            ranks = [card % 13 for card in hand]
-            score = sum(ranks)
-            player_scores.append(score)
-
-        if player_scores[0] > player_scores[1]:
-            # Player 0 wins
-            return [self.pot / 2, -self.pot / 2]
-        elif player_scores[0] < player_scores[1]:
-            # Player 1 wins
-            return [-self.pot / 2, self.pot / 2]
-        else:
-            # Tie
-            return [0, 0]
-        """
 
     def is_game_over(self):
         if self.game.hand.dealer.overall_winner is not None:
             return True
         return False
+
+    def resolve_game(self):
+        if self.phase == 0:
+            self.game.hand.dealer.deal_flop()
+            self.phase = 1
+            for i in range(3):
+                self.community_cards.append(
+                    (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
+                    (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+            self.game.p1.current_bet = 0
+            self.game.p2.current_bet = 0
+            self.last_actions = [None, None]
+        self.done = True
+        reward = self.calculate_rewards()
+        next_state = None
+        return next_state, reward, self.done
