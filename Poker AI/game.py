@@ -3,7 +3,8 @@ import pygame
 import pygame_widgets
 import sys
 import random
-
+from dqn import DQNAgent
+import torch
 from new_hand import *
 from settings import *
 from button import *
@@ -58,6 +59,7 @@ class Game:
         self.round = 1# 1 = player1 to act, -1 = player2 to act
         #self.total_current_bet = 0
         self.amount_to_call = 0
+
         bet_button.setButton('Bet', self.bet)
         check_button.setButton('Check', self.check)
         call_button.setButton('Call', self.call)
@@ -67,6 +69,15 @@ class Game:
                                 textColour=(0, 0, 0))
         self.raise_text = TextBox(self.screen, 610, 915, 100, 75, fontSize=40, borderColour=(0, 0, 0),
                                   textColour=(0, 0, 0))
+        """
+               input_size = 13
+               hidden_size = 128
+               action_size = 4
+               self.agent = DQNAgent(input_size, hidden_size, action_size)
+               self.agent.model.load_state_dict(torch.load('agent1_model.pth'))
+               self.agent.model.eval()
+               self.agent.epsilon = 0
+        """
 
     def bet_process(self):
         mousePos = pygame.mouse.get_pos()
@@ -185,19 +196,6 @@ class Game:
             self.call_process()
             self.raise_process()
             self.fold_process()
-            if self.pot_size.size == 0 and self.hand.dealer.determined_winner == None:
-                self.ante_up()
-            if self.turn == -1:
-                if self.betting_state == 1:
-                    self.call(self.p2, self.amount_to_call)
-                    self.turn *= -1
-                elif self.betting_state == 0:
-                    #self.check(self.hand.p2)
-                    p2_bet = random.randint(5, min(self.hand.p1.chips, self.hand.p2.chips))
-                    print(f"p2_bet = {p2_bet}")
-                    if p2_bet <= self.hand.p1.chips:
-                        self.bet(self.hand.p2, p2_bet)
-                        self.betting_state = -1
             events = pygame.event.get()
             # Handle quit operation
             for event in events:
@@ -251,6 +249,21 @@ class Game:
 
             self.hand.update()
             self.clock.tick(FPS)
+
+            """
+                       if self.turn == -1:
+                           state = self.extract_state()
+                           state_vector = self.preprocess_state(state)
+                           state_tensor = torch.FloatTensor(state_vector)
+
+                           with torch.no_grad():
+                               action = self.agent.act(state_tensor)
+
+                           self.execute_agent_action(action)
+
+                           # Switch turn
+                           self.turn *= -1
+                       """
 
     def ante_up(self):
         self.hand.p1.chips -= self.ante
@@ -332,3 +345,23 @@ class Game:
     def fold(self, player=Player):
         print(f"P{player.id} folds")
         player.fold = True
+
+    def extract_state(self):
+        """        state = {
+            'hand': self.player_hands[self.current_player],
+            'community': self.community_cards ,
+            'pot': self.pot_size.size,
+            'bets': [self.p1.current_bet, self.p2.current_bet],
+            'chip_stacks': [self.p1.chips, self.p2.chips],
+            'phase': self.phase,
+            'last_actions': self.last_actions,
+
+
+        }
+        """
+
+    def preprocess_state(self, state):
+        x=1
+
+    def execute_agent_action(self, action):
+        x=1
