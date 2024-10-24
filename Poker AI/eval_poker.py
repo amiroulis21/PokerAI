@@ -46,6 +46,14 @@ def train_agents(episodes=1000):
     agent0 = DQNAgent(input_size, hidden_size, action_size)
     agent1 = DQNAgent(input_size, hidden_size, action_size)
 
+    agent1.model.load_state_dict(torch.load('agent1_model_1000.pth'))
+
+    agent0.epsilon = 0
+    agent1.epsilon = 0
+
+    agent0_wins = 0
+    agent1_wins = 0
+
     for episode in range(episodes):
         env.reset()
         env.game.hand.dealer.deal_hole_cards()
@@ -53,7 +61,6 @@ def train_agents(episodes=1000):
         env.game.ante_up()
         #env.game.hand.update()
         done = False
-
         state = env.get_state()
 
         while not done:
@@ -79,6 +86,10 @@ def train_agents(episodes=1000):
 
             if done:
                 next_state_vector = None
+                if env.game.hand.dealer.determined_winner == "Player 1":
+                    agent0_wins += 1
+                elif env.game.hand.dealer.determined_winner == "Player 2":
+                    agent1_wins += 1
             else:
                 check = 1
                 next_state_vector = preprocess_state(next_state)
@@ -88,7 +99,7 @@ def train_agents(episodes=1000):
                 agent0.remember(state_vector, action, reward[0], next_state_vector, done)
                 agent0.replay()
             else:
-                agent1.remember(state_vector, action, reward[1], next_state_vector, done)
+                agent1.remember(state_vector, action, reward[0], next_state_vector, done)
                 agent1.replay()
 
             state = next_state if next_state is not None else state
@@ -110,6 +121,9 @@ def train_agents(episodes=1000):
         if episode % 100 == 0:
             print(f"Episode {episode}, Epsilon {agent0.epsilon}")
 
+    print(f"Agent0 Wins: {agent0_wins}")
+    print(f"Agent1 Wins: {agent1_wins}")
+
 
 
 
@@ -120,4 +134,4 @@ def train_agents(episodes=1000):
 
 
 if __name__ == '__main__':
-    train_agents(episodes=1000)
+    train_agents(episodes=2000)

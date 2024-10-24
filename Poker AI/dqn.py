@@ -53,6 +53,7 @@ class DQNAgent:
         dones = torch.FloatTensor([m[4] for m in minibatch])
 
         rewards = rewards / 1000.0
+        #print(f"Reward: {rewards} ")
         # Compute current Q values
         q_values = self.model(states).gather(1, actions)
 
