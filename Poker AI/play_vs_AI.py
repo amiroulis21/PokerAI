@@ -34,60 +34,66 @@ def preprocess_state(state):
 
     state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
     return state_vector
+'''
+def player_action(self, action, game=Game):
+    if action == 0:
+        game.fold(game.p1)
+    elif action == 1:
+'''
 
 
-def train_agents(episodes=1000):
+def play():
     env = SimplePokerEnv()
 
     input_size = 14
     hidden_size = 128
     action_size = 4  # Actions: Fold, Check/Call, Bet, Raise
+    actions = [0, 1, 2, 3]
 
-    agent0 = DQNAgent(input_size, hidden_size, action_size)
     agent1 = DQNAgent(input_size, hidden_size, action_size)
+    agent1.model.load_state_dict(torch.load('agent1_model_1000.pth'))
+    exit_game = False
 
-    for episode in range(episodes):
+    while not exit_game:
         env.reset()
         env.game.hand.dealer.deal_hole_cards()
         env.deal_hand()
         env.game.ante_up()
+        env.display_player_hand(env.game.p1)
         #env.game.hand.update()
         done = False
-
         state = env.get_state()
 
         while not done:
 
             current_player = state['current_player']
             state_vector = preprocess_state(state)
-            #Loop act and step
-            #step returns illegal action, big negative reward
             next_state = []
             if not env.illegal_actions.__contains__(1):
                 if current_player == 0:
-                    action = agent0.act(state_vector)
-                else:
+                    inp = input('Player 1\'s turn to act (0 = Fold, 1 = Check/Call, 2 = Bet, 3 = Raise)')
+                    while env.illegal_actions.__contains__(int(inp)) or not actions.__contains__(int(inp)):
+                        inp = input("This action is illegal, please try again (0 = Fold, 1 = Check/Call, 2 = Bet, 3 = Raise).")
+                    next_state, reward, done = env.step(int(inp), True)
+                    #player_action(int(inp), env.game)
+                elif current_player == 1:
                     action = agent1.act(state_vector)
-
-                next_state, reward, done = env.step(action)
+                    next_state, reward, done = env.step(action, False)
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
-            print(f"Reward:{reward}")
+            #print(f"Reward:{reward}")
             #if action was illegal
             #next_state = state
 
             if done:
                 next_state_vector = None
             else:
-                check = 1
                 next_state_vector = preprocess_state(next_state)
 
             # Agents store experiences and learn
-            if current_player == 0:
-                agent0.remember(state_vector, action, reward[0], next_state_vector, done)
-                agent0.replay()
-            else:
+
+            if current_player == 1:
                 agent1.remember(state_vector, action, reward[1], next_state_vector, done)
                 agent1.replay()
 
@@ -97,27 +103,12 @@ def train_agents(episodes=1000):
                 done = True
                 env.game.p1.chips = 1000
                 env.game.p2.chips = 1000
-            #env.game.screen.fill(BG_COLOR)
-            #env.game.hand.update()
-            #pygame.display.update()
-            #env.game.clock.tick(FPS)
 
         # Update target networks periodically
-        if episode % 10 == 0:
-            agent0.update_target_model()
-            agent1.update_target_model()
-
-        if episode % 100 == 0:
-            print(f"Episode {episode}, Epsilon {agent0.epsilon}")
-
-
-
 
     # Save models
-    torch.save(agent0.model.state_dict(), 'agent0_model_%d.pth'%episodes)
-    torch.save(agent1.model.state_dict(), 'agent1_model_%d.pth'%episodes)
     #self.agent.model.load_state_dict(torch.load('agent1_model.pth'))
 
 
 if __name__ == '__main__':
-    train_agents(episodes=1000)
+    play()

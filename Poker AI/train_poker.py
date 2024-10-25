@@ -69,7 +69,7 @@ def train_agents(episodes=1000):
                 else:
                     action = agent1.act(state_vector)
 
-                next_state, reward, done = env.step(action)
+                next_state, reward, done = env.step(action, False)
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
@@ -120,4 +120,4 @@ def train_agents(episodes=1000):
 
 
 if __name__ == '__main__':
-    train_agents(episodes=1000)
+    train_agents(episodes=2000)

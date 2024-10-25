@@ -76,7 +76,7 @@ def train_agents(episodes=1000):
                 else:
                     action = agent1.act(state_vector)
 
-                next_state, reward, done = env.step(action)
+                next_state, reward, done = env.step(action, False)
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
@@ -118,8 +118,8 @@ def train_agents(episodes=1000):
             agent0.update_target_model()
             agent1.update_target_model()
 
-        if episode % 100 == 0:
-            print(f"Episode {episode}, Epsilon {agent0.epsilon}")
+        #if episode % 100 == 0:
+            #print(f"Episode {episode}, Epsilon {agent0.epsilon}")
 
     print(f"Agent0 Wins: {agent0_wins}")
     print(f"Agent1 Wins: {agent1_wins}")
@@ -128,10 +128,10 @@ def train_agents(episodes=1000):
 
 
     # Save models
-    torch.save(agent0.model.state_dict(), 'agent0_model_%d.pth'%episodes)
-    torch.save(agent1.model.state_dict(), 'agent1_model_%d.pth'%episodes)
+    #torch.save(agent0.model.state_dict(), 'agent0_model_%d.pth'%episodes)
+    #torch.save(agent1.model.state_dict(), 'agent1_model_%d.pth'%episodes)
     #self.agent.model.load_state_dict(torch.load('agent1_model.pth'))
 
 
 if __name__ == '__main__':
-    train_agents(episodes=2000)
+    train_agents(episodes=1000)

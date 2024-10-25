@@ -34,6 +34,13 @@ class SimplePokerEnv:
         self.dealt_hole_cards = False
         self.illegal_actions = [3]
 
+    def display_player_hand(self, player=Player):
+        print(f"Player {player.id} Cards: {player.cards[0].id}, "
+              f"{player.cards[1].id}")
+
+    def display_community_cards(self):
+        print(f"Flop: {self.game.hand.flop.cards[0].id} , {self.game.hand.flop.cards[1].id}, "
+              f"{self.game.hand.flop.cards[2].id}")
 
     def deal_hand(self):
         for i in range(2):
@@ -63,7 +70,7 @@ class SimplePokerEnv:
         }
         return state
 
-    def step(self, action):
+    def step(self, action, is_player):
 
         if action not in [0, 1, 2, 3]:
             raise ValueError("Invalid action")
@@ -99,10 +106,10 @@ class SimplePokerEnv:
                 reward[self.current_player] = -2000
                 return self.get_state(), reward, self.done
 
-
             # Player bets/raises
             bet_amount = 20
-
+            if is_player:
+                bet_amount = int(input("Type bet amount: "))
             self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
                                                         min(self.game.player_list[self.current_player].chips,
                                                             self.game.player_list[1 - self.current_player].chips)))
@@ -117,6 +124,8 @@ class SimplePokerEnv:
                 reward[self.current_player] = -2000
                 return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
+            if is_player:
+                raise_amount = int(input("Type amount you want to raise to: "))
             if ((self.game.player_list[1 - self.current_player].current_bet + self.game.player_list[1 - self.current_player].chips) -
                 (self.game.player_list[self.current_player].current_bet + raise_amount)) < 0:
                 raise_amount = self.game.amount_to_call + self.game.player_list[1 - self.current_player].chips
@@ -142,16 +151,18 @@ class SimplePokerEnv:
                     self.community_cards.append(
                             (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                             (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+                self.display_community_cards()
                 self.game.p1.current_bet = 0
                 self.game.p2.current_bet = 0
                 self.last_actions = [None, None]
+                self.current_player = 0
             else:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
                 return next_state, reward, self.done
-        # Switch to the other player
-        self.current_player = 1 - self.current_player
+        else:
+            self.current_player = 1 - self.current_player
 
         reward = [0, 0]
         next_state = self.get_state()
@@ -197,6 +208,7 @@ class SimplePokerEnv:
                 self.community_cards.append(
                     (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                     (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+            self.display_community_cards()
             self.game.p1.current_bet = 0
             self.game.p2.current_bet = 0
             self.last_actions = [None, None]
