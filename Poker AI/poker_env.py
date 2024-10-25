@@ -3,7 +3,7 @@ import numpy as np
 from game import Game, Hand, Player, Pot
 from settings import *
 
-
+ILLEGAL_PENALTY = -20000 #-2000
 class SimplePokerEnv:
     def __init__(self):
         self.game = Game()
@@ -33,6 +33,7 @@ class SimplePokerEnv:
         self.done = False
         self.dealt_hole_cards = False
         self.illegal_actions = [3]
+
 
     def display_player_hand(self, player=Player):
         print(f"Player {player.id} Cards: {player.cards[0].id}, "
@@ -103,7 +104,7 @@ class SimplePokerEnv:
         elif action == 2:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
-                reward[self.current_player] = -2000
+                reward[self.current_player] = ILLEGAL_PENALTY
                 return self.get_state(), reward, self.done
 
             # Player bets/raises
@@ -121,7 +122,7 @@ class SimplePokerEnv:
         elif action == 3:
             if self.illegal_actions.__contains__(action):
                 reward = [0, 0]
-                reward[self.current_player] = -2000
+                reward[self.current_player] = ILLEGAL_PENALTY
                 return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
             if is_player:

@@ -35,6 +35,14 @@ def preprocess_state(state):
     state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
     return state_vector
 
+def load_agent(agent, filepath=None):
+    if filepath is None:
+        agent.epsilon = 1
+        agent.epsilon_decay = 1
+    else:
+        agent.model.load_state_dict(torch.load(filepath))
+        agent.epsilon = 0
+
 
 def train_agents(episodes=1000):
     env = SimplePokerEnv()
@@ -43,13 +51,12 @@ def train_agents(episodes=1000):
     hidden_size = 128
     action_size = 4  # Actions: Fold, Check/Call, Bet, Raise
 
-    agent0 = DQNAgent(input_size, hidden_size, action_size)
-    agent1 = DQNAgent(input_size, hidden_size, action_size)
+    agent0 = DQNAgent(input_size, hidden_size, action_size, training=False)
+    agent1 = DQNAgent(input_size, hidden_size, action_size, training=False)
 
-    agent1.model.load_state_dict(torch.load('agent1_model_1000.pth'))
-
-    agent0.epsilon = 0
-    agent1.epsilon = 0
+    load_agent(agent0)
+    #load_agent(agent0, 'agent0_model_1000.pth')
+    load_agent(agent1, 'agent1_model_2000.pth')
 
     agent0_wins = 0
     agent1_wins = 0
