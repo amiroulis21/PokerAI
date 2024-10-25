@@ -160,6 +160,7 @@ class SimplePokerEnv:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
+                self.display_player_hand(self.game.p2)
                 return next_state, reward, self.done
         else:
             self.current_player = 1 - self.current_player
@@ -215,4 +216,5 @@ class SimplePokerEnv:
         self.done = True
         reward = self.calculate_rewards()
         next_state = None
+        self.display_player_hand(self.game.p2)
         return next_state, reward, self.done
