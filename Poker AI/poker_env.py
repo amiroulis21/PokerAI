@@ -3,7 +3,7 @@ import numpy as np
 from game import Game, Hand, Player, Pot
 from settings import *
 
-ILLEGAL_PENALTY = -20000 #-2000
+ILLEGAL_PENALTY = -2000 #-2000
 class SimplePokerEnv:
     def __init__(self):
         self.game = Game()
@@ -33,6 +33,7 @@ class SimplePokerEnv:
         self.done = False
         self.dealt_hole_cards = False
         self.illegal_actions = [3]
+        self.penalty = 0
 
 
     def display_player_hand(self, player=Player):
@@ -70,11 +71,23 @@ class SimplePokerEnv:
 
         }
         return state
+    def replace_action(self, action):
+        print(f"P{self.current_player + 1} tries to use {action}")
+        self.penalty = ILLEGAL_PENALTY
+        if action == 3:
+            self.penalty = ILLEGAL_PENALTY
+            return 2
+        if action == 2:
+            self.penalty = ILLEGAL_PENALTY
+            return 3
+        return action
 
     def step(self, action, is_player):
-
+        self.penalty = 0
         if action not in [0, 1, 2, 3]:
             raise ValueError("Invalid action")
+        if action in self.illegal_actions:
+            action = self.replace_action(action)
         # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet, 3 = Raise
         if action == 0:
             self.game.fold(self.game.player_list[self.current_player])
@@ -97,17 +110,12 @@ class SimplePokerEnv:
                 self.game.check(self.game.player_list[self.current_player])
             self.illegal_actions = [3]
 
-            if self.game.p1.all_in and self.game.p2.all_in:
+            if self.game.p1.all_in or self.game.p2.all_in:
                 self.illegal_actions = [0, 1, 2, 3]
 
 
         elif action == 2:
-            if self.illegal_actions.__contains__(action):
-                reward = [0, 0]
-                reward[self.current_player] = ILLEGAL_PENALTY
-                return self.get_state(), reward, self.done
 
-            # Player bets/raises
             bet_amount = 20
             if is_player:
                 bet_amount = int(input("Type bet amount: "))
@@ -120,10 +128,6 @@ class SimplePokerEnv:
 
 
         elif action == 3:
-            if self.illegal_actions.__contains__(action):
-                reward = [0, 0]
-                reward[self.current_player] = ILLEGAL_PENALTY
-                return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
             if is_player:
                 raise_amount = int(input("Type amount you want to raise to: "))
@@ -167,6 +171,7 @@ class SimplePokerEnv:
             self.current_player = 1 - self.current_player
 
         reward = [0, 0]
+        reward[self.current_player] += self.penalty
         next_state = self.get_state()
         return next_state, reward, self.done
 
