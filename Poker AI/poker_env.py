@@ -74,6 +74,8 @@ class SimplePokerEnv:
     def replace_action(self, action):
         print(f"P{self.current_player + 1} tries to use {action}")
         self.penalty = ILLEGAL_PENALTY
+        if self.illegal_actions.__contains__(2) and self.illegal_actions.__contains__(3):
+            return 1
         if action == 3:
             self.penalty = ILLEGAL_PENALTY
             return 2
@@ -115,7 +117,6 @@ class SimplePokerEnv:
 
 
         elif action == 2:
-
             bet_amount = 20
             if is_player:
                 bet_amount = int(input("Type bet amount: "))
@@ -139,8 +140,8 @@ class SimplePokerEnv:
                                                                             self.current_player].chips))
 
             self.illegal_actions = [2]
-            if (self.game.player_list[self.current_player].current_bet == (self.game.player_list[1 - self.current_player].chips +
-                    self.game.player_list[1 - self.current_player].current_bet)) or self.game.player_list[self.current_player].all_in:
+            if (self.game.player_list[self.current_player].total_bet == (self.game.player_list[1 - self.current_player].chips +
+                    self.game.player_list[1 - self.current_player].total_bet)) or self.game.player_list[self.current_player].all_in:
                 self.illegal_actions.append(3)
             if self.game.p1.all_in and self.game.p2.all_in:
                 self.illegal_actions = [0, 1, 2, 3]

@@ -54,9 +54,12 @@ def train_agents(episodes=1000):
     agent0 = DQNAgent(input_size, hidden_size, action_size, training=False)
     agent1 = DQNAgent(input_size, hidden_size, action_size, training=False)
 
-    load_agent(agent0)
-    #load_agent(agent0, 'agent0_model_1000.pth')
+    #load_agent(agent0)
+    load_agent(agent0, 'agent0_model_1000.pth')
+    #load_agent(agent0, 'agent0_model_2000.pth')
+    #load_agent(agent1)
     load_agent(agent1, 'agent1_model_2000.pth')
+    #load_agent(agent1, 'agent1_model_2000.pth')
 
     agent0_wins = 0
     agent1_wins = 0

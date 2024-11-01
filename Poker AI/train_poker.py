@@ -120,4 +120,4 @@ def train_agents(episodes=1000):
 
 
 if __name__ == '__main__':
-    train_agents(episodes=2000)
+    train_agents(episodes=1000)
