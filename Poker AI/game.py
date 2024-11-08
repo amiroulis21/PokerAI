@@ -346,22 +346,6 @@ class Game:
         print(f"P{player.id} folds")
         player.fold = True
 
-    def extract_state(self):
-        """        state = {
-            'hand': self.player_hands[self.current_player],
-            'community': self.community_cards ,
-            'pot': self.pot_size.size,
-            'bets': [self.p1.current_bet, self.p2.current_bet],
-            'chip_stacks': [self.p1.chips, self.p2.chips],
-            'phase': self.phase,
-            'last_actions': self.last_actions,
 
 
-        }
-        """
 
-    def preprocess_state(self, state):
-        x=1
-
-    def execute_agent_action(self, action):
-        x=1

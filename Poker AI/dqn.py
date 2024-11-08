@@ -8,7 +8,7 @@ import torch.nn as nn
 
 
 class DQNAgent:
-    def __init__(self, input_size, hidden_size, action_size, lr=0.001, gamma=0.99):
+    def __init__(self, input_size, hidden_size, action_size, lr=0.001, gamma=0.99, training=True):
         self.model = PokerAgent(input_size, hidden_size, action_size)
         self.target_model = PokerAgent(input_size, hidden_size, action_size)
         self.update_target_model()
@@ -21,6 +21,7 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.action_size = action_size
+        self.training=training
 
     def update_target_model(self):
         self.target_model.load_state_dict(self.model.state_dict())
@@ -70,9 +71,10 @@ class DQNAgent:
         loss = self.criteria(q_values.squeeze(), q_targets)
 
         # Optimize the model
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        if self.training:
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
 
         # Update exploration rate
         if self.epsilon > self.epsilon_min:

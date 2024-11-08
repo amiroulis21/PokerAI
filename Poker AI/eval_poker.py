@@ -35,6 +35,14 @@ def preprocess_state(state):
     state_vector = np.concatenate([hand, community, pot, bets, chip_stacks, current_player, phase, last_actions])
     return state_vector
 
+def load_agent(agent, filepath=None):
+    if filepath is None:
+        agent.epsilon = 1
+        agent.epsilon_decay = 1
+    else:
+        agent.model.load_state_dict(torch.load(filepath))
+        agent.epsilon = 0
+
 
 def train_agents(episodes=1000):
     env = SimplePokerEnv()
@@ -43,13 +51,15 @@ def train_agents(episodes=1000):
     hidden_size = 128
     action_size = 4  # Actions: Fold, Check/Call, Bet, Raise
 
-    agent0 = DQNAgent(input_size, hidden_size, action_size)
-    agent1 = DQNAgent(input_size, hidden_size, action_size)
+    agent0 = DQNAgent(input_size, hidden_size, action_size, training=False)
+    agent1 = DQNAgent(input_size, hidden_size, action_size, training=False)
 
-    agent1.model.load_state_dict(torch.load('agent1_model_1000.pth'))
-
-    agent0.epsilon = 0
-    agent1.epsilon = 0
+    #load_agent(agent0)
+    load_agent(agent0, 'agent0_model_1000.pth')
+    #load_agent(agent0, 'agent0_model_2000.pth')
+    #load_agent(agent1)
+    load_agent(agent1, 'agent1_model_2000.pth')
+    #load_agent(agent1, 'agent1_model_2000.pth')
 
     agent0_wins = 0
     agent1_wins = 0
@@ -76,7 +86,7 @@ def train_agents(episodes=1000):
                 else:
                     action = agent1.act(state_vector)
 
-                next_state, reward, done = env.step(action)
+                next_state, reward, done = env.step(action, False)
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
@@ -118,8 +128,8 @@ def train_agents(episodes=1000):
             agent0.update_target_model()
             agent1.update_target_model()
 
-        if episode % 100 == 0:
-            print(f"Episode {episode}, Epsilon {agent0.epsilon}")
+        #if episode % 100 == 0:
+            #print(f"Episode {episode}, Epsilon {agent0.epsilon}")
 
     print(f"Agent0 Wins: {agent0_wins}")
     print(f"Agent1 Wins: {agent1_wins}")
@@ -128,10 +138,10 @@ def train_agents(episodes=1000):
 
 
     # Save models
-    torch.save(agent0.model.state_dict(), 'agent0_model_%d.pth'%episodes)
-    torch.save(agent1.model.state_dict(), 'agent1_model_%d.pth'%episodes)
+    #torch.save(agent0.model.state_dict(), 'agent0_model_%d.pth'%episodes)
+    #torch.save(agent1.model.state_dict(), 'agent1_model_%d.pth'%episodes)
     #self.agent.model.load_state_dict(torch.load('agent1_model.pth'))
 
 
 if __name__ == '__main__':
-    train_agents(episodes=2000)
+    train_agents(episodes=1000)

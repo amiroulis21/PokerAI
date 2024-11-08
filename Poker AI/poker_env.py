@@ -3,7 +3,7 @@ import numpy as np
 from game import Game, Hand, Player, Pot
 from settings import *
 
-
+ILLEGAL_PENALTY = -2000 #-2000
 class SimplePokerEnv:
     def __init__(self):
         self.game = Game()
@@ -33,7 +33,16 @@ class SimplePokerEnv:
         self.done = False
         self.dealt_hole_cards = False
         self.illegal_actions = [3]
+        self.penalty = 0
 
+
+    def display_player_hand(self, player=Player):
+        print(f"Player {player.id} Cards: {player.cards[0].id}, "
+              f"{player.cards[1].id}")
+
+    def display_community_cards(self):
+        print(f"Flop: {self.game.hand.flop.cards[0].id} , {self.game.hand.flop.cards[1].id}, "
+              f"{self.game.hand.flop.cards[2].id}")
 
     def deal_hand(self):
         for i in range(2):
@@ -62,11 +71,25 @@ class SimplePokerEnv:
 
         }
         return state
+    def replace_action(self, action):
+        print(f"P{self.current_player + 1} tries to use {action}")
+        self.penalty = ILLEGAL_PENALTY
+        if self.illegal_actions.__contains__(2) and self.illegal_actions.__contains__(3):
+            return 1
+        if action == 3:
+            self.penalty = ILLEGAL_PENALTY
+            return 2
+        if action == 2:
+            self.penalty = ILLEGAL_PENALTY
+            return 3
+        return action
 
-    def step(self, action):
-
+    def step(self, action, is_player):
+        self.penalty = 0
         if action not in [0, 1, 2, 3]:
             raise ValueError("Invalid action")
+        if action in self.illegal_actions:
+            action = self.replace_action(action)
         # Actions: 0 = Fold, 1 = Check/Call, 2 = Bet, 3 = Raise
         if action == 0:
             self.game.fold(self.game.player_list[self.current_player])
@@ -89,20 +112,14 @@ class SimplePokerEnv:
                 self.game.check(self.game.player_list[self.current_player])
             self.illegal_actions = [3]
 
-            if self.game.p1.all_in and self.game.p2.all_in:
+            if self.game.p1.all_in or self.game.p2.all_in:
                 self.illegal_actions = [0, 1, 2, 3]
 
 
         elif action == 2:
-            if self.illegal_actions.__contains__(action):
-                reward = [0, 0]
-                reward[self.current_player] = -2000
-                return self.get_state(), reward, self.done
-
-
-            # Player bets/raises
             bet_amount = 20
-
+            if is_player:
+                bet_amount = int(input("Type bet amount: "))
             self.game.bet(self.game.player_list[self.current_player], min(bet_amount,
                                                         min(self.game.player_list[self.current_player].chips,
                                                             self.game.player_list[1 - self.current_player].chips)))
@@ -112,11 +129,9 @@ class SimplePokerEnv:
 
 
         elif action == 3:
-            if self.illegal_actions.__contains__(action):
-                reward = [0, 0]
-                reward[self.current_player] = -2000
-                return self.get_state(), reward, self.done
             raise_amount = self.game.amount_to_call * 2
+            if is_player:
+                raise_amount = int(input("Type amount you want to raise to: "))
             if ((self.game.player_list[1 - self.current_player].current_bet + self.game.player_list[1 - self.current_player].chips) -
                 (self.game.player_list[self.current_player].current_bet + raise_amount)) < 0:
                 raise_amount = self.game.amount_to_call + self.game.player_list[1 - self.current_player].chips
@@ -125,8 +140,8 @@ class SimplePokerEnv:
                                                                             self.current_player].chips))
 
             self.illegal_actions = [2]
-            if (self.game.player_list[self.current_player].current_bet == (self.game.player_list[1 - self.current_player].chips +
-                    self.game.player_list[1 - self.current_player].current_bet)) or self.game.player_list[self.current_player].all_in:
+            if (self.game.player_list[self.current_player].total_bet == (self.game.player_list[1 - self.current_player].chips +
+                    self.game.player_list[1 - self.current_player].total_bet)) or self.game.player_list[self.current_player].all_in:
                 self.illegal_actions.append(3)
             if self.game.p1.all_in and self.game.p2.all_in:
                 self.illegal_actions = [0, 1, 2, 3]
@@ -142,18 +157,22 @@ class SimplePokerEnv:
                     self.community_cards.append(
                             (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                             (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+                self.display_community_cards()
                 self.game.p1.current_bet = 0
                 self.game.p2.current_bet = 0
                 self.last_actions = [None, None]
+                self.current_player = 0
             else:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
+                self.display_player_hand(self.game.p2)
                 return next_state, reward, self.done
-        # Switch to the other player
-        self.current_player = 1 - self.current_player
+        else:
+            self.current_player = 1 - self.current_player
 
         reward = [0, 0]
+        reward[self.current_player] += self.penalty
         next_state = self.get_state()
         return next_state, reward, self.done
 
@@ -197,10 +216,12 @@ class SimplePokerEnv:
                 self.community_cards.append(
                     (value_dict[str(self.game.hand.dealer.flop.cards[i].data.value)] - 2) +
                     (13 * suit_dict[self.game.hand.dealer.flop.cards[i].data.suit]))
+            self.display_community_cards()
             self.game.p1.current_bet = 0
             self.game.p2.current_bet = 0
             self.last_actions = [None, None]
         self.done = True
         reward = self.calculate_rewards()
         next_state = None
+        self.display_player_hand(self.game.p2)
         return next_state, reward, self.done
