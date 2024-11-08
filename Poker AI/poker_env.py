@@ -72,15 +72,16 @@ class SimplePokerEnv:
         }
         return state
     def replace_action(self, action):
-        print(f"P{self.current_player + 1} tries to use {action}")
-        self.penalty = ILLEGAL_PENALTY
+        #print(f"P{self.current_player + 1} tries to use {action}")
+        #self.penalty = ILLEGAL_PENALTY
         if self.illegal_actions.__contains__(2) and self.illegal_actions.__contains__(3):
+            self.penalty = ILLEGAL_PENALTY
             return 1
         if action == 3:
-            self.penalty = ILLEGAL_PENALTY
+            #self.penalty = ILLEGAL_PENALTY
             return 2
         if action == 2:
-            self.penalty = ILLEGAL_PENALTY
+            #self.penalty = ILLEGAL_PENALTY
             return 3
         return action
 
@@ -166,7 +167,6 @@ class SimplePokerEnv:
                 self.done = True
                 reward = self.calculate_rewards()
                 next_state = None
-                self.display_player_hand(self.game.p2)
                 return next_state, reward, self.done
         else:
             self.current_player = 1 - self.current_player
@@ -223,5 +223,4 @@ class SimplePokerEnv:
         self.done = True
         reward = self.calculate_rewards()
         next_state = None
-        self.display_player_hand(self.game.p2)
         return next_state, reward, self.done

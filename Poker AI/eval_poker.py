@@ -55,10 +55,10 @@ def train_agents(episodes=1000):
     agent1 = DQNAgent(input_size, hidden_size, action_size, training=False)
 
     #load_agent(agent0)
-    load_agent(agent0, 'agent0_model_1000.pth')
-    #load_agent(agent0, 'agent0_model_2000.pth')
+    #load_agent(agent0, 'agent0_model_1000.pth')
+    load_agent(agent0, 'agent0_model_2000.pth')
     #load_agent(agent1)
-    load_agent(agent1, 'agent1_model_2000.pth')
+    load_agent(agent1, 'agent1_model_1000.pth')
     #load_agent(agent1, 'agent1_model_2000.pth')
 
     agent0_wins = 0
@@ -90,7 +90,7 @@ def train_agents(episodes=1000):
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
-            print(f"Reward:{reward}")
+            #print(f"Reward:{reward}")
             #if action was illegal
             #next_state = state
 

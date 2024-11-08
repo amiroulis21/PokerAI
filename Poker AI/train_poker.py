@@ -73,7 +73,7 @@ def train_agents(episodes=1000):
             else:
                 next_state, reward, done = env.resolve_game()
             #keep tally of reward
-            print(f"Reward:{reward}")
+            #print(f"Reward:{reward}")
             #if action was illegal
             #next_state = state
 

@@ -88,6 +88,7 @@ def play():
 
             if done:
                 next_state_vector = None
+                env.display_player_hand(env.game.p2)
             else:
                 next_state_vector = preprocess_state(next_state)
 
