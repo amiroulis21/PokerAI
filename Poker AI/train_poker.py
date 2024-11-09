@@ -3,7 +3,7 @@ from dqn import DQNAgent
 from settings import *
 import numpy as np
 import torch
-import pygame, pygame_widgets
+#import pygame, pygame_widgets
 
 
 def preprocess_state(state):
@@ -120,4 +120,4 @@ def train_agents(episodes=1000):
 
 
 if __name__ == '__main__':
-    train_agents(episodes=1000)
+    train_agents(episodes=2000)

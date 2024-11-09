@@ -3,7 +3,7 @@ from dqn import DQNAgent
 from settings import *
 import numpy as np
 import torch
-import pygame, pygame_widgets
+#import pygame, pygame_widgets
 
 
 def preprocess_state(state):
@@ -58,8 +58,8 @@ def train_agents(episodes=1000):
     #load_agent(agent0, 'agent0_model_1000.pth')
     load_agent(agent0, 'agent0_model_2000.pth')
     #load_agent(agent1)
-    load_agent(agent1, 'agent1_model_1000.pth')
-    #load_agent(agent1, 'agent1_model_2000.pth')
+    #load_agent(agent1, 'agent1_model_1000.pth')
+    load_agent(agent1, 'agent1_model_2000.pth')
 
     agent0_wins = 0
     agent1_wins = 0

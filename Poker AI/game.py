@@ -69,16 +69,8 @@ class Game:
                                 textColour=(0, 0, 0))
         self.raise_text = TextBox(self.screen, 610, 915, 100, 75, fontSize=40, borderColour=(0, 0, 0),
                                   textColour=(0, 0, 0))
-        """
-               input_size = 13
-               hidden_size = 128
-               action_size = 4
-               self.agent = DQNAgent(input_size, hidden_size, action_size)
-               self.agent.model.load_state_dict(torch.load('agent1_model.pth'))
-               self.agent.model.eval()
-               self.agent.epsilon = 0
-        """
 
+    """
     def bet_process(self):
         mousePos = pygame.mouse.get_pos()
         bet_button.buttonSurface.fill(bet_button.fillColors['normal'])
@@ -250,7 +242,7 @@ class Game:
             self.hand.update()
             self.clock.tick(FPS)
 
-            """
+            
                        if self.turn == -1:
                            state = self.extract_state()
                            state_vector = self.preprocess_state(state)
@@ -263,7 +255,7 @@ class Game:
 
                            # Switch turn
                            self.turn *= -1
-                       """
+    """
 
     def ante_up(self):
         self.hand.p1.chips -= self.ante
@@ -311,17 +303,6 @@ class Game:
         self.turn *= -1
         #self.call(amount)
 
-    """
-        self.hand.p1.chips -= 5
-        self.hand.p1.current_bet += 5
-        self.hand.p1.total_bet += 5
-        self.total_current_bet += 5
-        self.pot_size += 5
-        self.bet_exists = True
-        print(f"P1 bet {self.hand.p1.current_bet}")
-        print(f"P1 {self.hand.p1.chips}")
-        self.call()
-        """
 
     def raise_bet(self, player=Player, amount=int):
         player.chips -= amount
